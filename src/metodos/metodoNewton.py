@@ -3,15 +3,15 @@ import sympy as sp
 """
 Implementación del método de Newton-Raphson para hallar raíces.
 f_expr: expresión de sympy
-x_orig: símbolo de la variable (x)
+x: símbolo de la variable (x)
 x0: valor inicial
-tol: tolerancia
+tol: máximo error permitido
 max_iter: número máximo de iteraciones
 """
-def newtonRaphson(f_expr, x_orig, x0, tol, max_iter=100):
-    df_expr = sp.diff(f_expr, x_orig)
-    f = sp.lambdify(x_orig, f_expr, 'numpy')
-    df = sp.lambdify(x_orig, df_expr, 'numpy')
+def newtonRaphson(f_expr, x, x0, tol, max_iter = 100):
+    df_expr = sp.diff(f_expr, x)
+    f = sp.lambdify(x, f_expr, 'numpy')
+    df = sp.lambdify(x, df_expr, 'numpy')
 
     iteraciones = []
     xi = x0
@@ -21,10 +21,10 @@ def newtonRaphson(f_expr, x_orig, x0, tol, max_iter=100):
         df_xi = df(xi)
 
         if abs(df_xi) < 1e-12:
-            return None, "Error: Derivada cercana a cero. El método no puede continuar."
+            return None, "Error: La derivada de la expresión ingresada es cercana a cero. El método no puede continuar."
 
-        xi_nuevo = xi - f_xi / df_xi
-        error = abs(xi_nuevo - xi)
+        xi_nuevo = xi - (f_xi / df_xi)
+        error = abs((xi_nuevo - xi) / xi_nuevo) if xi_nuevo != 0 else abs(xi_nuevo - xi)
         
         iteraciones.append({
             'iter': i,
@@ -35,7 +35,7 @@ def newtonRaphson(f_expr, x_orig, x0, tol, max_iter=100):
             'error': error
         })
 
-        if error < tol or abs(f_xi) < tol:
+        if error < tol:
             break
         
         xi = xi_nuevo

@@ -5,7 +5,7 @@ Implementación del método de bisección para hallar raíces.
 f_expr: expresión de sympy
 x: símbolo de la variable (x)
 a, b: intervalo inicial
-tol: tolerancia
+tol: máximo error permitido
 max_iter: número máximo de iteraciones
 """
 def biseccion(f_expr, x, a, b, tol, max_iter = 100):

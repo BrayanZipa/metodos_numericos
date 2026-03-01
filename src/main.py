@@ -37,6 +37,7 @@ def menu():
     
     while True:
         print("\n--- MÉTODOS NUMÉRICOS POR BRAYAN ZIPA ---")
+        print("\nSintaxis recomendada: sqrt(x), log(x), exp(x), sin(x), cos(x), x**n")
         print("\n--- Seleccione el método a utilizar ---\n")
         print("1. Método de Bisección")
         print("2. Método de Newton-Raphson")
@@ -55,13 +56,17 @@ def menu():
             continue
 
         try:
-            if opcion == '4':
-                expr_str = input("Ingrese la función g(x) tal que x = g(x) (ej: cos(x)): ")
-            else:
-                expr_str = input("Ingrese la función f(x) (ej: x**2 - 4 o cos(x) - x): ")
+            if opcion == '1':
+                expr_str = input("Ingrese la función f(x) ----> ejemplo de sintaxis: x**3 - 25:  ")
+            elif opcion == '2':
+                expr_str = input("Ingrese la función f(x) ----> ejemplo de sintaxis: x**3 -2*x - 5:  ")
+            elif opcion == '3':
+                expr_str = input("Ingrese la función f(x) ----> ejemplo de sintaxis: cos(x) - x:  ")
+            elif opcion == '4':
+                expr_str = input("Ingrese la función g(x) tal que x = g(x) ----> ejemplo de sintaxis: sqrt((10 - x**3)/4):  ")
             
             f_expr = sp.parse_expr(expr_str)
-            tol = float(input("Ingrese la tolerancia (ej: 0.01): "))
+            tol = float(input("Ingrese el máximo error permitido (ej: 0.001): "))
             
             if opcion == '1':
                 a = float(input("Ingrese el límite inferior (a): "))
@@ -106,7 +111,7 @@ def menu():
                     print(error_msg)
                 else:
                     print("\nResultados Método de la Secante:")
-                    headers = ["Iter", "x0", "x1", "f(x0)", "f(x1)", "x_nuevo", "Error"]
+                    headers = ["Iter", "x0", "x1", "f(x0)", "f(x1)", "xi+1", "Error"]
                     data = [[i['iter'], f"{i['x0']:.6f}", f"{i['x1']:.6f}", f"{i['f(x0)']:.6f}", f"{i['f(x1)']:.6f}", f"{i['xi+1']:.6f}", f"{i['error']:.6f}"] for i in iteraciones]
                     print(tabulate(data, headers=headers, tablefmt="grid"))
                     
