@@ -28,7 +28,7 @@ def graficar(f_expr, x_sym, raiz, a=None, b=None):
     plt.title("Gráfica de la función y su raíz")
     plt.xlabel("x")
     plt.ylabel("f(x)")
-    # plt.legend()
+    plt.legend()
     plt.grid(True)
     plt.show()
 
