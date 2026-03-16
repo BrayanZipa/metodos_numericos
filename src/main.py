@@ -1,38 +1,13 @@
-import numpy as np
-import matplotlib.pyplot as plt
 import sympy as sp
 from tabulate import tabulate
 from metodos.metodoBiseccion import biseccion
 from metodos.metodoNewton import newtonRaphson
 from metodos.metodoSecante import secante
 from metodos.metodoPuntoFijo import puntoFijo
+from graficar import graficarMetodos, graficarInterpolacion
+from interpolacion.polinomioTaylor import taylor
 
-def graficar(f_expr, x_sym, raiz, a=None, b=None):
-    f_np = sp.lambdify(x_sym, f_expr, 'numpy')
-    
-    # Determinar rango de la gráfica
-    if a is not None and b is not None:
-        margin = max(abs(b - a) * 0.5, 1.0)
-        x_vals = np.linspace(a - margin, b + margin, 400)
-    else:
-        x_vals = np.linspace(raiz - 2, raiz + 2, 400)
-
-    y_vals = f_np(x_vals)
-
-    plt.figure(figsize=(10, 6))
-    plt.plot(x_vals, y_vals, label=f"f(x) = {f_expr}")
-    plt.axhline(0, color='black', linewidth=0.5)
-    plt.axvline(0, color='black', linewidth=0.5)
-    plt.scatter([raiz], [f_np(raiz)], color='red', label=f'Raíz aprox: {raiz:.6f}')
-    
-    plt.title("Gráfica de la función y su raíz")
-    plt.xlabel("x")
-    plt.ylabel("f(x)")
-    plt.legend()
-    plt.grid(True)
-    plt.show()
-
-def menu():
+def menuMetodos():
     x = sp.symbols('x')
     
     while True:
@@ -43,7 +18,7 @@ def menu():
         print("2. Método de Newton-Raphson")
         print("3. Método de la Secante")
         print("4. Método de Punto Fijo")
-        print("5. Salir")
+        print("5. Volver al menú principal")
         
         opcion = input("\nElija una opción: ")
         
@@ -83,7 +58,7 @@ def menu():
                     print(tabulate(data, headers=headers, tablefmt="grid"))
                     
                     raiz_final = iteraciones[-1]['pn']
-                    graficar(f_expr, x, raiz_final, a, b)
+                    graficarMetodos(f_expr, x, raiz_final, a, b)
 
             elif opcion == '2':
                 x0 = float(input("Ingrese el valor inicial (x0): "))
@@ -99,7 +74,7 @@ def menu():
                     print(tabulate(data, headers=headers, tablefmt="grid"))
                     
                     raiz_final = iteraciones[-1]['xi+1']
-                    graficar(f_expr, x, raiz_final)
+                    graficarMetodos(f_expr, x, raiz_final)
             
             elif opcion == '3':
                 x0 = float(input("Ingrese el valor inicial (x0): "))
@@ -116,7 +91,7 @@ def menu():
                     print(tabulate(data, headers=headers, tablefmt="grid"))
                     
                     raiz_final = iteraciones[-1]['xi+1']
-                    graficar(f_expr, x, raiz_final)
+                    graficarMetodos(f_expr, x, raiz_final)
             
             elif opcion == '4':
                 x0 = float(input("Ingrese el valor inicial (x0): "))
@@ -132,10 +107,110 @@ def menu():
                     print(tabulate(data, headers=headers, tablefmt="grid"))
                     
                     raiz_final = iteraciones[-1]['g(xi)']
-                    graficar(f_expr, x, raiz_final)
+                    graficarMetodos(f_expr, x, raiz_final)
 
         except Exception as e:
             print(f"Error al procesar los datos: {e}")
+
+def menuInterpolacion():
+    x = sp.symbols('x')
+    
+    while True:
+        print("\n--- MÉTODOS DE INTERPOLACIÓN POR BRAYAN ZIPA ---")
+        print("\nSintaxis recomendada: sqrt(x), log(x), exp(x), sin(x), cos(x), x**n")
+        print("\n--- Seleccione el método a utilizar ---\n")
+        print("1. Polinomio de Taylor")
+        print("2. Volver al menú principal")
+        
+        opcion = input("\nElija una opción: ")
+        
+        if opcion == '2':
+            break
+            
+        if opcion != '1':
+            print("Opción no válida.")
+            continue
+            
+        try:
+            expr_str = input("Ingrese la función f(x) ----> ejemplo de sintaxis: exp(x), sin(x):  ")
+            f_expr = sp.parse_expr(expr_str)
+            x0 = float(input("Ingrese el punto de evaluación x0: "))
+            n = int(input("Ingrese el grado del polinomio (n): "))
+            
+            x_eval_str = input("Ingrese el valor x a evaluar (deje en blanco para solo ver el polinomio): ")
+            x_eval = float(x_eval_str) if x_eval_str.strip() else None
+            
+            polinomio, iteraciones, error_msg = taylor(f_expr, x, x0, n, x_eval)
+            
+            if error_msg:
+                print(error_msg)
+            else:
+                print("\nResultados Polinomio de Taylor:")
+                headers = ["n", "f^n(x)", "f^n(x0)", "Término f^n(x0)/n! * (x-x0)^n"]
+                if x_eval is not None:
+                    headers.extend([f"Valor Término en x={x_eval}", "Suma Acumulada"])
+                    
+                data = []
+                for i in iteraciones:
+                    row = [i['k'], i['df_k'], f"{float(i['df_k_x0']):.6g}", i['termino']]
+                    if x_eval is not None:
+                        row.extend([f"{float(i['val_termino']):.6g}", f"{float(i['val_acumulado']):.6g}"])
+                    data.append(row)
+                    
+                print(tabulate(data, headers=headers, tablefmt="grid"))
+                
+                print(f"\nPolinomio de Taylor de grado {n}:")
+                print(f"P(x) = {polinomio}")
+                
+                if x_eval is not None:
+                    valor_real = float(f_expr.subs(x, x_eval))
+                    valor_aprox = float(polinomio.subs(x, x_eval))
+                    error_abs = abs(valor_real - valor_aprox)
+                    
+                    print(f"\nValor Real f({x_eval}) = {valor_real:.6g}")
+                    print(f"Valor Aproximado P({x_eval}) = {valor_aprox:.6g}")
+                    print(f"Error Absoluto = {error_abs:.6g}")
+                    
+                    if valor_real != 0:
+                        error_rel_unitario = error_abs / abs(valor_real)
+                        error_rel_porcentual = error_rel_unitario * 100
+                        print(f"Error Relativo = {error_rel_unitario:.6g}")
+                        print(f"Error Relativo (%) = {error_rel_porcentual:.6g}%")
+                    else:
+                        print("Error Relativo = N/A")
+                        print("Error Relativo (%) = N/A (división por cero, valor real es 0)")
+                
+                a_graf, b_graf = x0 - 2, x0 + 2
+                if x_eval is not None:
+                    margen = abs(x_eval - x0)
+                    if margen == 0:
+                        margen = 2
+                    a_graf = min(x0, x_eval) - margen * 0.5
+                    b_graf = max(x0, x_eval) + margen * 0.5
+                
+                graficarInterpolacion(f_expr, polinomio, x, x0, a_graf, b_graf)
+                
+        except Exception as e:
+            print(f"Error al procesar los datos: {e}")
+
+def menu():
+    while True:
+        print("\n--- MENÚ PRINCIPAL ---")
+        print("1. Métodos Numéricos")
+        print("2. Interpolación")
+        print("3. Salir")
+        
+        opcion = input("\nElija una opción: ")
+        
+        if opcion == '1':
+            menuMetodos()
+        elif opcion == '2':
+            menuInterpolacion()
+        elif opcion == '3':
+            print("Saliendo del programa...")
+            break
+        else:
+            print("Opción no válida.")
 
 if __name__ == "__main__":
     menu()
