@@ -9,7 +9,7 @@ x0: punto de evaluación o centro alrededor del cual se aproxima
 n: grado máximo del polinomio a calcular
 x_eval: punto opcional en el que se desea evaluar el polinomio resultante
 """
-def taylor(f_expr, x, x0, n, x_eval=None):
+def taylor(f_expr, x, x0, n, x_eval = None):
     polinomio = 0
     iteraciones = []
     
