@@ -1,3 +1,7 @@
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import sympy as sp
 from metodos.metodoSecante import secante
 from metodos.metodoPuntoFijo import puntoFijo
@@ -55,7 +59,6 @@ def test_secante():
 def test_punto_fijo():
     print("\nTesting Fixed Point Method...")
     x = sp.symbols('x')
-    # x = cos(x)
     g_expr = sp.cos(x)
     x0 = 0.5
     tol = 0.0001

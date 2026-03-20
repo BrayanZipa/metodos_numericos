@@ -45,31 +45,55 @@ x: símbolo de la variable (x)
 x0: punto de evaluación (centro) del polinomio
 a, b: límites opcionales para el visualización en el eje x
 """
-def graficarInterpolacion(f_expr, p_expr, x, x0, a=None, b=None):
-
-    f_np = sp.lambdify(x, f_expr, 'numpy')
+def graficarInterpolacion(f_expr, p_expr, x, x0=None, puntos_x=None, puntos_y=None, metodo="Taylor", a=None, b=None):
+    # Convertir a funciones de numpy para graficar
+    f_np = sp.lambdify(x, f_expr, 'numpy') if f_expr is not None else None
     p_np = sp.lambdify(x, p_expr, 'numpy')
     
-    # Determinar rango de la gráfica
+    # Determinar el rango de valores de x para la gráfica
     if a is not None and b is not None:
         margin = max(abs(b - a) * 0.1, 0.5)
         x_vals = np.linspace(a - margin, b + margin, 400)
+    elif puntos_x is not None and len(puntos_x) > 0:
+        x_min, x_max = min(puntos_x), max(puntos_x)
+        margin = max(abs(x_max - x_min) * 0.5, 1.0)
+        x_vals = np.linspace(x_min - margin, x_max + margin, 400)
+    elif x0 is not None:
+        x_vals = np.linspace(x0 - 5, x0 + 5, 400)
     else:
-        x_vals = np.linspace(x0 - 2, x0 + 2, 400)
+        x_vals = np.linspace(-10, 10, 400)
 
-    y_vals_f = f_np(x_vals)
-    y_vals_p = p_np(x_vals)
 
-    # plt.figure(figsize=(10, 6))
     plt.figure()
     plt.get_current_fig_manager().window.state('zoomed')
-    plt.plot(x_vals, y_vals_f, label=f"f(x) = {f_expr}", color='blue')
-    plt.plot(x_vals, y_vals_p, label=f"P(x) (Polinomio de Taylor)", linestyle='--', color='orange')
+
+    # Graficar función original si existe
+    if f_np is not None:
+        try:
+            y_vals_f = f_np(x_vals)
+            plt.plot(x_vals, y_vals_f, label=f"f(x) = {f_expr}", color='blue', alpha=0.7)
+        except Exception:
+            pass # Evitar errores si la función no es evaluable en el rango
+
+    # Graficar polinomio de interpolación
+    y_vals_p = p_np(x_vals)
+    plt.plot(x_vals, y_vals_p, label=f"P(x) (Polinomio de {metodo})", linestyle='--', color='orange', linewidth=2)
+    
+    # Ejes
     plt.axhline(0, color='black', linewidth=0.5)
     plt.axvline(0, color='black', linewidth=0.5)
-    plt.scatter([x0], [float(f_np(x0))], color='red', label=f'Centro: x0={x0}')
     
-    plt.title("Interpolación por Polinomio de Taylor")
+    # Marcar puntos en la gráfica
+    if metodo == "Taylor" and x0 is not None:
+        try:
+            y0 = float(f_expr.subs(x, x0)) if f_expr is not None else float(p_expr.subs(x, x0))
+            plt.scatter([x0], [y0], color='red', zorder=5, label=f'Centro: x0={x0}')
+        except:
+            pass
+    elif puntos_x is not None and puntos_y is not None:
+        plt.scatter(puntos_x, puntos_y, color='red', zorder=5, label='Puntos originales')
+    
+    plt.title(f"Interpolación por Polinomio de {metodo}")
     plt.xlabel("x")
     plt.ylabel("y")
     plt.legend()
