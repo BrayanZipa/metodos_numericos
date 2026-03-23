@@ -16,3 +16,7 @@ Thumbs.db
 
 # Archivos temporales
 *.log
+
+# Carpetas de salida
+archivos_xml/
+archivos_ggb/

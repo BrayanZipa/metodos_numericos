@@ -4,9 +4,10 @@ from metodos.metodoBiseccion import biseccion
 from metodos.metodoNewton import newtonRaphson
 from metodos.metodoSecante import secante
 from metodos.metodoPuntoFijo import puntoFijo
-from graficar import graficarMetodos, graficarInterpolacion
 from interpolacion.polinomioTaylor import taylor
 from interpolacion.polinomioLagrange import lagrange
+from graficar import graficarMetodos, graficarInterpolacion
+from generarArchivo import crear_ggb
 
 def menuMetodos():
     x = sp.symbols('x')
@@ -122,14 +123,14 @@ def menuInterpolacion():
         print("\n--- Seleccione el método a utilizar ---\n")
         print("1. Polinomio de Taylor")
         print("2. Polinomio de Lagrange")
-        print("3. Volver al menú principal")
+        print("4. Volver al menú principal")
         
         opcion = input("\nElija una opción: ")
         
-        if opcion == '3':
+        if opcion == '4':
             break
             
-        if opcion not in ['1', '2']:
+        if opcion not in ['1', '2', '3']:
             print("Opción no válida.")
             continue
             
@@ -190,7 +191,12 @@ def menuInterpolacion():
                             margen = 2
                         a_graf = min(x0, x_eval) - margen * 0.5
                         b_graf = max(x0, x_eval) + margen * 0.5
+
+                    puntos_ggb = [(x0, float(f_expr.subs(x, x0)))]
+                    if x_eval is not None:
+                        puntos_ggb.append((x_eval, float(polinomio.subs(x, x_eval))))
                     
+                    crear_ggb([f_expr, polinomio], puntos_ggb, f"pol_taylor_n_{n}_x0_{x0}")
                     graficarInterpolacion(f_expr, polinomio, x, x0=x0, a=a_graf, b=b_graf)
             
             elif opcion == '2':
@@ -232,8 +238,13 @@ def menuInterpolacion():
                         valor_aprox = float(polinomio.subs(x, x_eval))
                         print(f"\nValor Aproximado P({x_eval}) = {valor_aprox:.6g}")
                     
+                    puntos_ggb = list(zip(puntos_x, puntos_y))
+                    if x_eval is not None:
+                        puntos_ggb.append((x_eval, float(polinomio.subs(x, x_eval))))
+
+                    crear_ggb([polinomio], puntos_ggb, f"pol_lagrange_n_{num_puntos}")
                     graficarInterpolacion(None, polinomio, x, puntos_x=puntos_x, puntos_y=puntos_y, metodo="Lagrange")
-                
+
         except Exception as e:
             print(f"Error al procesar los datos: {e}")
 
