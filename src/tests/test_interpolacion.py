@@ -5,6 +5,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import sympy as sp
 from interpolacion.polinomioTaylor import taylor
 from interpolacion.polinomioLagrange import lagrange
+from interpolacion.polinomioNewton import newton
 
 def test_taylor():
     print("Testing Taylor Polynomial...")
@@ -17,7 +18,7 @@ def test_taylor():
     if error_msg:
         print(f"Error: {error_msg}")
     else:
-        # P(x) = 1 + x + x^2/2
+        print(f"Polinomio: {polinomio}")
         val_0 = float(polinomio.subs(x, 0))
         val_1 = float(polinomio.subs(x, 1))
         print(f"P(0) = {val_0:.6f}")
@@ -42,11 +43,29 @@ def test_lagrange():
             print(f"P({xi}) = {val:.6f} (Esperado: {yi})")
             assert abs(val - yi) < 0.001
         print("Lagrange Polynomial Test Passed!")
+        
+def test_newton():
+    print("\nTesting Newton Polynomial...")
+    x = sp.symbols('x')
+    x_pts = [0, 1, 2]
+    y_pts = [1, 2, 4]
+    polinomio, data, error_msg = newton(x_pts, y_pts, x)
+    
+    if error_msg:
+        print(f"Error: {error_msg}")
+    else:
+        print(f"Polinomio: {polinomio}")
+        for xi, yi in zip(x_pts, y_pts):
+            val = float(polinomio.subs(x, xi))
+            print(f"P({xi}) = {val:.6f} (Esperado: {yi})")
+            assert abs(val - yi) < 0.001
+        print("Newton Polynomial Test Passed!")
 
 if __name__ == "__main__":
     try:
         test_taylor()
         test_lagrange()
+        test_newton()
         print("\nAll tests passed successfully!")
     except Exception as e:
         print(f"\nTests failed: {e}")

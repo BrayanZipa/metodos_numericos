@@ -6,8 +6,9 @@ from metodos.metodoSecante import secante
 from metodos.metodoPuntoFijo import puntoFijo
 from interpolacion.polinomioTaylor import taylor
 from interpolacion.polinomioLagrange import lagrange
+from interpolacion.polinomioNewton import newton
 from graficar import graficarMetodos, graficarInterpolacion
-from generarArchivo import crear_ggb
+from generarArchivo import crearGgb
 
 def menuMetodos():
     x = sp.symbols('x')
@@ -123,6 +124,7 @@ def menuInterpolacion():
         print("\n--- Seleccione el método a utilizar ---\n")
         print("1. Polinomio de Taylor")
         print("2. Polinomio de Lagrange")
+        print("3. Polinomio de Newton")
         print("4. Volver al menú principal")
         
         opcion = input("\nElija una opción: ")
@@ -196,7 +198,7 @@ def menuInterpolacion():
                     if x_eval is not None:
                         puntos_ggb.append((x_eval, float(polinomio.subs(x, x_eval))))
                     
-                    crear_ggb([f_expr, polinomio], puntos_ggb, f"pol_taylor_n_{n}_x0_{x0}")
+                    crearGgb([f_expr, polinomio], puntos_ggb, f"pol_taylor_n_{n}_x0_{x0}")
                     graficarInterpolacion(f_expr, polinomio, x, x0=x0, a=a_graf, b=b_graf)
             
             elif opcion == '2':
@@ -242,8 +244,80 @@ def menuInterpolacion():
                     if x_eval is not None:
                         puntos_ggb.append((x_eval, float(polinomio.subs(x, x_eval))))
 
-                    crear_ggb([polinomio], puntos_ggb, f"pol_lagrange_n_{num_puntos}")
+                    crearGgb([polinomio], puntos_ggb, f"pol_lagrange_n_{num_puntos}")
                     graficarInterpolacion(None, polinomio, x, puntos_x=puntos_x, puntos_y=puntos_y, metodo="Lagrange")
+
+            elif opcion == '3':
+                num_puntos = int(input("Ingrese la cantidad de puntos (n): "))
+                puntos_x = []
+                puntos_y = []
+                for i in range(num_puntos):
+                    px = float(input(f"x[{i}]: "))
+                    py = float(input(f"y[{i}]: "))
+                    puntos_x.append(px)
+                    puntos_y.append(py)
+                
+                x_eval_str = input("Ingrese el valor x a evaluar (deje en blanco para solo ver el polinomio): ")
+                x_eval = float(x_eval_str) if x_eval_str.strip() else None
+                
+                polinomio, data, error_msg = newton(puntos_x, puntos_y, x, x_eval)
+                
+                if error_msg:
+                    print(error_msg)
+                else:
+                    print("\nResultados Polinomio de Newton:")
+                    
+                    # Tabla de Diferencias Divididas
+                    tabla_diff = data['tabla']
+                    
+                    # Ajustar headers según las diferencias presentes
+                    max_diffs = 0
+                    if tabla_diff:
+                        max_diffs = max(len([k for k in r.keys() if k.startswith('diff_')]) for r in tabla_diff)
+                    
+                    headers_tabla = ["i", "xi", "f[xi]"]
+                    for j in range(1, max_diffs + 1):
+                        headers_tabla.append(f"Diff {j}")
+
+                    filas_tabla = []
+                    for i, row in enumerate(tabla_diff):
+                        fila = [i, row['xi'], row['fi']]
+                        for j in range(1, max_diffs + 1):
+                            val = row.get(f'diff_{j}', "")
+                            fila.append(f"{val:.6f}" if isinstance(val, (int, float)) else val)
+                        filas_tabla.append(fila)
+                        
+                    print("\nTabla de Diferencias Divididas:")
+                    print(tabulate(filas_tabla, headers=headers_tabla, tablefmt="grid"))
+                    
+                    # Términos del Polinomio
+                    print("\nPasos para construir el Polinomio:")
+                    headers_pasos = ["i", "Coeficiente", "Término Ak * (x-x0)..."]
+                    if x_eval is not None:
+                        headers_pasos.append(f"Valor en x={x_eval}")
+                    
+                    filas_pasos = []
+                    for p in data['pasos']:
+                        fila = [p['i'], f"{p['coef']:.6f}", p['termino']]
+                        if x_eval is not None:
+                            fila.append(f"{p['val_termino']:.6g}")
+                        filas_pasos.append(fila)
+                    
+                    print(tabulate(filas_pasos, headers=headers_pasos, tablefmt="grid"))
+                    
+                    print(f"\nPolinomio de Newton P(x):")
+                    print(f"P(x) = {polinomio}")
+                    
+                    if x_eval is not None:
+                        valor_aprox = float(polinomio.subs(x, x_eval))
+                        print(f"\nValor Aproximado P({x_eval}) = {valor_aprox:.6g}")
+                    
+                    puntos_ggb = list(zip(puntos_x, puntos_y))
+                    if x_eval is not None:
+                        puntos_ggb.append((x_eval, float(polinomio.subs(x, x_eval))))
+
+                    crearGgb([polinomio], puntos_ggb, f"pol_newton_n_{num_puntos}")
+                    graficarInterpolacion(None, polinomio, x, puntos_x=puntos_x, puntos_y=puntos_y, metodo="Newton")
 
         except Exception as e:
             print(f"Error al procesar los datos: {e}")

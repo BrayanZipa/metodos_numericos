@@ -7,7 +7,7 @@ from datetime import datetime
 Convierte un número a cadena evitando la notación científica 'e' si es posible, o formateándola a (*10^).
 val: valor numérico a formatear
 """
-def format_num(val):
+def formatNum(val):
     if isinstance(val, (int, float)):
         # Si es muy pequeño, se usa más precisión para evitar que se convierta en 0
         s = f"{val:.15f}".rstrip('0').rstrip('.')
@@ -20,7 +20,7 @@ def format_num(val):
 Genera la estructura XML para un conjunto de puntos.
 puntos: lista de tuplas (x, y)
 """
-def generar_puntos(puntos):
+def generarPuntos(puntos):
     xml = ""
     letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
@@ -33,8 +33,8 @@ def generar_puntos(puntos):
             label = f"{letra}{numero}"
 
         # Formatear para XML (coordenadas numéricas puras)
-        x_str = format_num(x_val)
-        y_str = format_num(y_val)
+        x_str = formatNum(x_val)
+        y_str = formatNum(y_val)
         
         # Evitar notación científica y usar formato decimal para coords
         x_xml = f"{float(x_val):.15f}".rstrip('0').rstrip('.')
@@ -60,7 +60,7 @@ Genera la estructura XML para un conjunto de funciones.
 Maneja la conversión de notación científica 'e' a el formato (*10^).
 funciones: lista de expresiones de sympy o cadenas
 """
-def generar_funciones(funciones):
+def generarFunciones(funciones):
     xml = ""
     letras = ["f", "g", "h", "p", "q", "r"]
     colores = [
@@ -105,7 +105,7 @@ Crea el contenido completo del archivo .xml.
 funciones_xml: cadena XML con las definiciones de funciones
 puntos_xml: cadena XML con las definiciones de puntos
 """
-def crear_xml(funciones_xml, puntos_xml):
+def crearXml(funciones_xml, puntos_xml):
     return f"""<?xml version="1.0" encoding="utf-8"?>
     <geogebra format="5.0" version="5.0.0.0">
         <construction title="Generado con Python" author="" date="">
@@ -121,7 +121,7 @@ funciones: lista de funciones a graficar
 puntos: lista de puntos (x, y) a graficar
 nombre_base: nombre inicial para el archivo generado
 """
-def crear_ggb(funciones = None, puntos = None, nombre_base = "archivo"):
+def crearGgb(funciones = None, puntos = None, nombre_base = "archivo"):
     funciones = funciones or []
     puntos = puntos or []
 
@@ -139,9 +139,9 @@ def crear_ggb(funciones = None, puntos = None, nombre_base = "archivo"):
     ruta_ggb = os.path.join(carpeta_ggb, f"{nombre_final}.ggb")
 
     # Generar estructura del archivo .XML
-    funciones_xml = generar_funciones(funciones) if funciones else ""
-    puntos_xml = generar_puntos(puntos) if puntos else ""
-    xml_final = crear_xml(funciones_xml, puntos_xml)
+    funciones_xml = generarFunciones(funciones) if funciones else ""
+    puntos_xml = generarPuntos(puntos) if puntos else ""
+    xml_final = crearXml(funciones_xml, puntos_xml)
 
     # Crear archivo .XML
     with open(ruta_xml, "w", encoding="utf-8") as f:
