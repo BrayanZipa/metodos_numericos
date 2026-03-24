@@ -37,13 +37,13 @@ def lagrange(x_points, y_points, x, x_eval = None):
                 'i': i,
                 'xi': x_points[i],
                 'yi': y_points[i],
-                'li': str(sp.N(li, 6)),
-                'termino': str(sp.N(termino, 6)),
+                'li': str(sp.expand(li.evalf(6))),
+                'termino': str(sp.expand(termino.evalf(6))),
                 'val_li': val_li,
                 'val_termino': val_termino
             })
             
-        polinomio = sp.simplify(polinomio)
+        polinomio = sp.simplify(polinomio.evalf(6))
         return polinomio, li_polinomios, None
     except Exception as e:
         return None, None, f"Error al calcular el polinomio de Lagrange: {str(e)}"

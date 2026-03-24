@@ -152,13 +152,13 @@ def menuInterpolacion():
                     print(error_msg)
                 else:
                     print("\nResultados Polinomio de Taylor:")
-                    headers = ["n", "f^n(x)", "f^n(x0)", "Término f^n(x0)/n! * (x-x0)^n"]
+                    headers = ["n", "f^n(x)", "f^n(x0)", "Término f^n(x0)/n! * (x-x0)^n", "Término f^n(x0)/n! * (x-x0)^n simplificado"]
                     if x_eval is not None:
                         headers.extend([f"Valor Término en x={x_eval}", "Suma Acumulada"])
                         
                     data = []
                     for i in iteraciones:
-                        row = [i['k'], i['df_k'], f"{float(i['df_k_x0']):.6g}", i['termino']]
+                        row = [i['k'], i['df_k'], f"{float(i['df_k_x0']):.6g}", i['termino'], i['termino_simple']]
                         if x_eval is not None:
                             row.extend([f"{float(i['val_termino']):.6g}", f"{float(i['val_acumulado']):.6g}"])
                         data.append(row)
@@ -292,13 +292,13 @@ def menuInterpolacion():
                     
                     # Términos del Polinomio
                     print("\nPasos para construir el Polinomio:")
-                    headers_pasos = ["i", "Coeficiente", "Término Ak * (x-x0)..."]
+                    headers_pasos = ["i", "xi", "f[xi]", "Coeficiente", "Término ai * (x-x0)...", "Término ai * (x-x0)... simplificado"]
                     if x_eval is not None:
                         headers_pasos.append(f"Valor en x={x_eval}")
                     
                     filas_pasos = []
                     for p in data['pasos']:
-                        fila = [p['i'], f"{p['coef']:.6f}", p['termino']]
+                        fila = [p['i'], p['xi'], p['fi'], f"{p['coef']:.6f}", p['termino'], p['termino_simple']]
                         if x_eval is not None:
                             fila.append(f"{p['val_termino']:.6g}")
                         filas_pasos.append(fila)

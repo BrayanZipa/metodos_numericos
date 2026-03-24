@@ -37,6 +37,7 @@ def newton(x_points, y_points, x, x_eval=None):
             'fi': y_points[0],
             'coef': tabla[0][0],
             'termino': str(sp.N(sp.Float(tabla[0][0]), 6)),
+            'termino_simple': str(sp.N(sp.Float(tabla[0][0]), 6)),
             'val_termino': float(tabla[0][0]) if x_eval is not None else "N/A"
         })
         
@@ -57,10 +58,12 @@ def newton(x_points, y_points, x, x_eval=None):
                 'fi': y_points[i],
                 'coef': coeficiente,
                 'termino': str(sp.N(termino, 6)),
+                'termino_simple': str(sp.expand(termino.evalf(6))),
                 'val_termino': val_termino
             })
             
-        polinomio = sp.simplify(polinomio)
+        polinomio = sp.simplify(polinomio.evalf(6))
+
         
         # Estructurar la tabla de diferencias divididas
         diff_table = []

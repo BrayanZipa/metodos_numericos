@@ -18,11 +18,11 @@ def taylor(f_expr, x, x0, n, x_eval = None):
             # Calcular derivada k-ésima
             df_k = sp.diff(f_expr, x, k)
             # Evaluar derivada en x0
-            df_k_x0 = df_k.subs(x, x0).evalf()
+            df_k_x0 = df_k.subs(x, x0).evalf(6)
             
             # Calcular término de Taylor: f^(k)(x0) / k! * (x - x0)^k
             termino = (df_k_x0 / math.factorial(k)) * (x - x0)**k
-            polinomio += sp.N(termino, 6)
+            polinomio += termino
             
             # Calcular valor del término si hay x_eval
             val_termino = "N/A"
@@ -36,10 +36,11 @@ def taylor(f_expr, x, x0, n, x_eval = None):
                 'df_k': df_k,
                 'df_k_x0': df_k_x0,
                 'termino': str(sp.N(termino, 6)),
+                'termino_simple': str(sp.expand(termino.evalf(6))),
                 'val_termino': val_termino,
                 'val_acumulado': val_acumulado
             })
             
-        return polinomio, iteraciones, None
+        return sp.simplify(polinomio.evalf(6)), iteraciones, None
     except Exception as e:
         return None, None, f"Error al calcular por el polinomio de Taylor: {str(e)}"
