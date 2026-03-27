@@ -1,5 +1,6 @@
 import numpy as np
 import sympy as sp
+from tabulate import tabulate
 from generarArchivo import crearGgb
 
 """
@@ -35,4 +36,9 @@ def evaluarFuncion(expr_str, inicio, fin, paso, nombre_base="graficacion_puntos"
     puntos_x = generarRango(inicio, fin, paso)
     puntos_ggb = evaluarPuntos(f_expr, puntos_x)
     crearGgb([f_expr], puntos_ggb, nombre_base)
+
+    print(f"\nFunción: f(x) = {f_expr}\n")
+    tabla = [(x, y) for x, y in puntos_ggb]
+    print(tabulate(tabla, headers=["x", "f(x)"], tablefmt="rounded_outline", floatfmt=(".2f", ".6f")))
+
     return f_expr, puntos_ggb
