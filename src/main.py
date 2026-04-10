@@ -360,10 +360,10 @@ def menuInterpolacion():
                         headers_sum = ["i"] + list(tabla_sum[0].keys())
                         filas_sum = []
                         for i_row, row in enumerate(tabla_sum):
-                            fila = [i_row] + [f"{row[k]:.6g}" if isinstance(row[k], (int, float)) else row[k] for k in headers_sum[1:]]
+                            fila = [i_row] + [f"{row[k]:.6f}" if isinstance(row[k], (int, float)) else row[k] for k in headers_sum[1:]]
                             filas_sum.append(fila)
                         
-                        fila_sumatoria = ["Σ"] + [f"{sumas[k]:.6g}" for k in headers_sum[1:]]
+                        fila_sumatoria = ["Σ"] + [f"{sumas[k]:.6f}" for k in headers_sum[1:]]
                         filas_sum.append(fila_sumatoria)
                         
                         print(tabulate(filas_sum, headers=headers_sum, tablefmt="grid"))
@@ -375,7 +375,7 @@ def menuInterpolacion():
                     data_sistema = []
                     headers_sistema = [f"a{i}" for i in range(grado + 1)] + ["=", "b"]
                     for i in range(grado + 1):
-                        fila = [f"{val:.6g}" for val in m_ata[i]] + ["="] + [f"{m_aty[i]:.6g}"]
+                        fila = [f"{val:.6f}" for val in m_ata[i]] + ["="] + [f"{m_aty[i]:.6f}"]
                         data_sistema.append(fila)
                         
                     print(tabulate(data_sistema, headers=headers_sistema, tablefmt="grid"))
@@ -387,16 +387,16 @@ def menuInterpolacion():
                     print(tabulate(data_coef, headers=["Coeficiente", "Valor"], tablefmt="grid"))
                     
                     print("\nMétricas de error:")
-                    print(f"Error sumatoria de cuadrados residuales (Sr): {reporte['sr']:.6g}")
-                    print(f"Sumatoria total (St): {reporte['st']:.6g}")
-                    print(f"Coeficiente de determinación r^2: {reporte['r2']:.6g}")
+                    print(f"Error sumatoria de cuadrados residuales (Sr): {reporte['sr']:.6f}")
+                    print(f"Sumatoria total (St): {reporte['st']:.6f}")
+                    print(f"Coeficiente de determinación r^2: {reporte['r2']:.6f}")
                     
                     print(f"\nPolinomio resultante P(x):")
                     print(f"P(x) = {polinomio}")
                     
                     if x_eval is not None:
                         valor_aprox = float(polinomio.subs(x, x_eval))
-                        print(f"\nValor Aproximado P({x_eval}) = {valor_aprox:.6g}")
+                        print(f"\nValor Aproximado P({x_eval}) = {valor_aprox:.6f}")
                     
                     puntos_ggb = list(zip(puntos_x, puntos_y))
                     if x_eval is not None:

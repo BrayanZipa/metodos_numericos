@@ -6,6 +6,7 @@ import sympy as sp
 from interpolacion.polinomioTaylor import taylor
 from interpolacion.polinomioLagrange import lagrange
 from interpolacion.polinomioNewton import newton
+from interpolacion.polinomioMinimosCuadrados import minimosCuadrados
 
 def test_taylor():
     print("Testing Taylor Polynomial...")
@@ -49,7 +50,8 @@ def test_newton():
     x = sp.symbols('x')
     x_pts = [0, 1, 2]
     y_pts = [1, 2, 4]
-    polinomio, data, error_msg = newton(x_pts, y_pts, x)
+    tipo_diferencia = 1
+    polinomio, data, error_msg = newton(x_pts, y_pts, x, tipo_diferencia)
     
     if error_msg:
         print(f"Error: {error_msg}")
@@ -61,11 +63,30 @@ def test_newton():
             assert abs(val - yi) < 0.001
         print("Newton Polynomial Test Passed!")
 
+def test_minimos_cuadrados():
+    print("\nTesting Minimos Cuadrados Polynomial...")
+    x = sp.symbols('x')
+    # Using the same data points provided as example in main.py
+    x_pts = [1, 2, 3, 4, 5, 6, 7]
+    y_pts = [0.5, 0.25, 2, 4, 3.5, 6, 5.5]
+    grado = 1
+    polinomio, reporte, error_msg = minimosCuadrados(x_pts, y_pts, x, grado)
+    
+    if error_msg:
+        print(f"Error: {error_msg}")
+    else:
+        print(f"Polinomio: {polinomio}")
+        sr = reporte['sr']
+        print(f"Sr: {sr:.6f}")
+        assert sr >= 0  # Sum of squared residuals should be non-negative
+        print("Minimos Cuadrados Test Passed!")
+
 if __name__ == "__main__":
     try:
         test_taylor()
         test_lagrange()
         test_newton()
+        test_minimos_cuadrados()
         print("\nAll tests passed successfully!")
     except Exception as e:
         print(f"\nTests failed: {e}")
