@@ -262,7 +262,7 @@ def menuInterpolacion():
                 print("\n1. Diferencias Divididas Progresivas")
                 print("2. Diferencias Divididas Regresivas")
                 print("3. Diferencias Divididas Centradas")
-                tipo_diferencia = int(input("\nElija que tipo de diferencia dividida calcular: "))
+                tipo_diferencia = int(input("\nElija que tipo de diferencia dividida a calcular: "))
 
                 if tipo_diferencia not in [1, 2, 3]:
                     print("Opción no válida.")
@@ -329,7 +329,82 @@ def menuInterpolacion():
 
                     crearGgb([polinomio], puntos_ggb, f"pol_newton_n_{num_puntos}")
                     graficarInterpolacion(None, polinomio, x, puntos_x=puntos_x, puntos_y=puntos_y, metodo="Newton")
-    
+
+            elif opcion == '4':
+                num_puntos = int(input("Ingrese la cantidad de puntos (n): "))
+                puntos_x = []
+                puntos_y = []
+                for i in range(num_puntos):
+                    px = float(input(f"x[{i}]: "))
+                    py = float(input(f"y[{i}]: "))
+                    puntos_x.append(px)
+                    puntos_y.append(py)
+                
+                grado = int(input("Ingrese el grado del polinomio a ajustar (m): "))
+                
+                x_eval_str = input("Ingrese el valor x a evaluar (deje en blanco para solo ver el polinomio): ")
+                x_eval = float(x_eval_str) if x_eval_str.strip() else None
+                
+                polinomio, reporte, error_msg = minimosCuadrados(puntos_x, puntos_y, x, grado, x_eval)
+                
+                if error_msg:
+                    print(error_msg)
+                else:
+                    print("\nResultados Mínimos Cuadrados:")
+                    
+                    print("\nTabla de Sumatorias:")
+                    tabla_sum = reporte['tabla_sumatorias']
+                    sumas = reporte['sumatorias']
+                    
+                    if tabla_sum:
+                        headers_sum = ["i"] + list(tabla_sum[0].keys())
+                        filas_sum = []
+                        for i_row, row in enumerate(tabla_sum):
+                            fila = [i_row] + [f"{row[k]:.6g}" if isinstance(row[k], (int, float)) else row[k] for k in headers_sum[1:]]
+                            filas_sum.append(fila)
+                        
+                        fila_sumatoria = ["Σ"] + [f"{sumas[k]:.6g}" for k in headers_sum[1:]]
+                        filas_sum.append(fila_sumatoria)
+                        
+                        print(tabulate(filas_sum, headers=headers_sum, tablefmt="grid"))
+
+                    print("\nSistema Mínimos Cuadrados Normales (A^T * A * a = A^T * y):")
+                    m_ata = reporte['AtA']
+                    m_aty = reporte['AtY']
+                    
+                    data_sistema = []
+                    headers_sistema = [f"a{i}" for i in range(grado + 1)] + ["=", "b"]
+                    for i in range(grado + 1):
+                        fila = [f"{val:.6g}" for val in m_ata[i]] + ["="] + [f"{m_aty[i]:.6g}"]
+                        data_sistema.append(fila)
+                        
+                    print(tabulate(data_sistema, headers=headers_sistema, tablefmt="grid"))
+                    
+                    print("\nCoeficientes obtenidos:")
+                    data_coef = []
+                    for i, coef in enumerate(reporte['coeficientes']):
+                        data_coef.append([f"a{i}", f"{coef:.6f}"])
+                    print(tabulate(data_coef, headers=["Coeficiente", "Valor"], tablefmt="grid"))
+                    
+                    print("\nMétricas de error:")
+                    print(f"Error sumatoria de cuadrados residuales (Sr): {reporte['sr']:.6g}")
+                    print(f"Sumatoria total (St): {reporte['st']:.6g}")
+                    print(f"Coeficiente de determinación r^2: {reporte['r2']:.6g}")
+                    
+                    print(f"\nPolinomio resultante P(x):")
+                    print(f"P(x) = {polinomio}")
+                    
+                    if x_eval is not None:
+                        valor_aprox = float(polinomio.subs(x, x_eval))
+                        print(f"\nValor Aproximado P({x_eval}) = {valor_aprox:.6g}")
+                    
+                    puntos_ggb = list(zip(puntos_x, puntos_y))
+                    if x_eval is not None:
+                        puntos_ggb.append((x_eval, float(polinomio.subs(x, x_eval))))
+
+                    crearGgb([polinomio], puntos_ggb, f"pol_minimos_cuadrados_m_{grado}")
+                    graficarInterpolacion(None, polinomio, x, puntos_x=puntos_x, puntos_y=puntos_y, metodo="Mínimos Cuadrados")
+                
         except Exception as e:
             print(f"Error al procesar los datos: {e}")
 
