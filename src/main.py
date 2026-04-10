@@ -391,9 +391,9 @@ def menuInterpolacion():
                     print(f"Sumatoria total (St): {reporte['st']:.6f}")
                     print(f"Coeficiente de determinación r^2: {reporte['r2']:.6f}")
                     
-                    print(f"\nPolinomio resultante P(x):")
+                    print(f"\nPolinomio por mínimos cuadrados de grado {grado}:")
                     print(f"P(x) = {polinomio}")
-                    
+
                     if x_eval is not None:
                         valor_aprox = float(polinomio.subs(x, x_eval))
                         print(f"\nValor Aproximado P({x_eval}) = {valor_aprox:.6f}")
