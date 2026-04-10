@@ -7,6 +7,7 @@ from metodos.metodoPuntoFijo import puntoFijo
 from interpolacion.polinomioTaylor import taylor
 from interpolacion.polinomioLagrange import lagrange
 from interpolacion.polinomioNewton import newton
+from interpolacion.polinomioMinimosCuadrados import minimosCuadrados
 from graficar import graficarMetodos, graficarInterpolacion
 from generarArchivo import crearGgb
 
@@ -125,14 +126,15 @@ def menuInterpolacion():
         print("1. Polinomio de Taylor")
         print("2. Polinomio de Lagrange")
         print("3. Polinomio de Newton")
-        print("4. Volver al menú principal")
+        print("4. Polinomio por el método de mínimos cuadrados")
+        print("5. Volver al menú principal")
         
         opcion = input("\nElija una opción: ")
         
-        if opcion == '4':
+        if opcion == '5':
             break
             
-        if opcion not in ['1', '2', '3']:
+        if opcion not in ['1', '2', '3', '4', '5']:
             print("Opción no válida.")
             continue
             
@@ -256,11 +258,20 @@ def menuInterpolacion():
                     py = float(input(f"y[{i}]: "))
                     puntos_x.append(px)
                     puntos_y.append(py)
+
+                print("\n1. Diferencias Divididas Progresivas")
+                print("2. Diferencias Divididas Regresivas")
+                print("3. Diferencias Divididas Centradas")
+                tipo_diferencia = int(input("\nElija que tipo de diferencia dividida calcular: "))
+
+                if tipo_diferencia not in [1, 2, 3]:
+                    print("Opción no válida.")
+                    continue
                 
                 x_eval_str = input("Ingrese el valor x a evaluar (deje en blanco para solo ver el polinomio): ")
                 x_eval = float(x_eval_str) if x_eval_str.strip() else None
                 
-                polinomio, data, error_msg = newton(puntos_x, puntos_y, x, x_eval)
+                polinomio, data, error_msg = newton(puntos_x, puntos_y, x, tipo_diferencia, x_eval)
                 
                 if error_msg:
                     print(error_msg)
@@ -292,13 +303,13 @@ def menuInterpolacion():
                     
                     # Términos del Polinomio
                     print("\nPasos para construir el Polinomio:")
-                    headers_pasos = ["i", "xi", "f[xi]", "Coeficiente", "Término ai * (x-x0)...", "Término ai * (x-x0)... simplificado"]
+                    headers_pasos = ["i", "Coeficiente", "Término ai * (x-x0)...", "Término ai * (x-x0)... simplificado"]
                     if x_eval is not None:
                         headers_pasos.append(f"Valor en x={x_eval}")
                     
                     filas_pasos = []
                     for p in data['pasos']:
-                        fila = [p['i'], p['xi'], p['fi'], f"{p['coef']:.6f}", p['termino'], p['termino_simple']]
+                        fila = [p['i'], f"{p['coef']:.6f}", p['termino'], p['termino_simple']]
                         if x_eval is not None:
                             fila.append(f"{p['val_termino']:.6g}")
                         filas_pasos.append(fila)
@@ -318,7 +329,7 @@ def menuInterpolacion():
 
                     crearGgb([polinomio], puntos_ggb, f"pol_newton_n_{num_puntos}")
                     graficarInterpolacion(None, polinomio, x, puntos_x=puntos_x, puntos_y=puntos_y, metodo="Newton")
-
+    
         except Exception as e:
             print(f"Error al procesar los datos: {e}")
 
