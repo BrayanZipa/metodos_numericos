@@ -10,8 +10,8 @@ b: Valor final del intervalo.
 n: Número total de puntos a generar.
 """
 def generarPuntosEquidistantes(a, b, n):
-    puntos = list(np.linspace(a, b, n))
-    print("Puntos generados:", puntos)
+    puntos = [float(x) for x in np.linspace(a, b, n)]
+    print("Puntos generados:", [f"{x:.6f}" for x in puntos])
     return puntos
 
 """
