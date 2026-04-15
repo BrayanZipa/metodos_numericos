@@ -4,6 +4,17 @@ from tabulate import tabulate
 from generarArchivo import crearGgb
 
 """
+Genera n puntos equidistantes en el intervalo [a, b].
+a: Valor inicial del intervalo.
+b: Valor final del intervalo.
+n: Número total de puntos a generar.
+"""
+def generarPuntosEquidistantes(a, b, n):
+    puntos = list(np.linspace(a, b, n))
+    print("Puntos generados:", puntos)
+    return puntos
+
+"""
 Genera un array de números en un rango especificado.
 inicio: valor de inicio
 fin: valor de fin
@@ -26,19 +37,16 @@ def evaluarPuntos(f_expr, puntos_x):
 Crea una función desde un string, genera puntos en un rango determinado y 
 genera un archivo .ggb con la función y los puntos.
 expr_str: string con la expresión de la función (ej: "x**2")
-inicio: valor inicial del rango
-fin: valor final del rango
-paso: incremento en el rango
+puntos: lista o array de valores x a evaluar
 nombre_base: nombre para el archivo .ggb generado
 """
-def evaluarFuncion(expr_str, inicio, fin, paso, nombre_base="graficacion_puntos"):
+def evaluarFuncion(expr_str, puntos, nombre_base="graficacion_puntos"):
     f_expr = sp.parse_expr(expr_str)
-    puntos_x = generarRango(inicio, fin, paso)
-    puntos_ggb = evaluarPuntos(f_expr, puntos_x)
-    crearGgb([f_expr], puntos_ggb, nombre_base)
+    puntos_x = evaluarPuntos(f_expr, puntos)
+    crearGgb([f_expr], puntos_x, nombre_base)
 
     print(f"\nFunción: f(x) = {f_expr}\n")
-    tabla = [(x, y) for x, y in puntos_ggb]
+    tabla = [(x, y) for x, y in puntos_x]
     print(tabulate(tabla, headers=["x", "f(x)"], tablefmt="rounded_outline", floatfmt=(".2f", ".6f")))
 
-    return f_expr, puntos_ggb
+    return f_expr, puntos_x
