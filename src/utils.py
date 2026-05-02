@@ -15,6 +15,25 @@ def generarPuntosEquidistantes(a, b, n):
     return puntos
 
 """
+Analiza si un conjunto de puntos es equidistante y calcula los pasos entre ellos.
+x: Lista o arreglo de puntos.
+tolerancia: Margen de error para comparar los pasos.
+"""
+def analizarPuntos(x, tolerancia=1e-9):
+    x = np.array(x, dtype=float)
+    pasos = np.diff(x)
+    
+    # Verifica si todos los pasos son iguales dentro de una tolerancia
+    equidistante = np.all(np.abs(pasos - pasos[0]) < tolerancia)
+    paso = pasos[0] if equidistante else None
+    
+    return {
+        "pasos": pasos,
+        "equidistante": equidistante,
+        "paso": paso
+    }
+
+"""
 Genera un array de números en un rango especificado.
 inicio: valor de inicio
 fin: valor de fin
