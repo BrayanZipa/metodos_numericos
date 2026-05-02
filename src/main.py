@@ -8,8 +8,9 @@ from interpolacion.polinomioTaylor import taylor
 from interpolacion.polinomioLagrange import lagrange
 from interpolacion.polinomioNewton import newton
 from interpolacion.polinomioMinimosCuadrados import minimosCuadrados
-from integracion.reglaTrapecio import reglaTrapecioSimple, reglaTrapecioCompuesta
+from integracion.reglaTrapecio import trapecioSimple, trapecioCompuesta
 from integracion.reglaSimpson import simpsonUnTercioSimple, simpsonUnTercioCompuesta, simpsonTresOctavosSimple, simpsonTresOctavosCompuesta
+from integracion.reglaBoole import booleSimple, booleCompuesta
 from graficar import graficarMetodos, graficarInterpolacion, graficarIntegracion
 from generarArchivo import crearGgb
 
@@ -408,7 +409,6 @@ def menuInterpolacion():
                 
         except Exception as e:
             print(f"Error al procesar los datos: {e}")
-
 def menuIntegracionNumerica():
     x = sp.symbols('x')
 
@@ -418,14 +418,15 @@ def menuIntegracionNumerica():
         print("\n--- Seleccione el método a utilizar ---\n")
         print("1. Regla del Trapecio")
         print("2. Regla de Simpson")
-        print("3. Volver al menú principal")
+        print("3. Regla de Boole")
+        print("4. Volver al menú principal")
         
         opcion = input("\nElija una opción: ")
         
-        if opcion == '3':
+        if opcion == '4':
             break
             
-        if opcion not in ['1', '2']:
+        if opcion not in ['1', '2', '3']:
             print("Opción no válida.")
             continue
 
@@ -446,11 +447,11 @@ def menuIntegracionNumerica():
                 b = float(input("Ingrese el límite superior (b): "))
                 
                 if sub_opcion == '1':
-                    aprox, exacto, error, tabla, h, error_msg = reglaTrapecioSimple(f_expr, x, a, b)
+                    aprox, exacto, error, tabla, h, error_msg = trapecioSimple(f_expr, x, a, b)
                     metodo_nombre = "Trapecio Simple"
                 elif sub_opcion == '2':
                     n = int(input("Ingrese el número de subintervalos (n): "))
-                    aprox, exacto, error, tabla, h, error_msg = reglaTrapecioCompuesta(f_expr, x, a, b, n)
+                    aprox, exacto, error, tabla, h, error_msg = trapecioCompuesta(f_expr, x, a, b, n)
                     metodo_nombre = "Trapecio Compuesta"
                 
                 if error_msg:
@@ -576,6 +577,83 @@ def menuIntegracionNumerica():
                     crearGgb([f_expr], puntos_ggb, nombre_archivo)
                     
                     graficarIntegracion(f_expr, x, a, b, puntos_x, puntos_y, metodo=metodo_nombre)
+
+            elif opcion == '3':
+                print("\n--- Regla de Boole ---")
+                print("1. Boole Simple")
+                print("2. Boole Compuesta")
+                sub_opcion = input("\nElija una opción: ")
+                
+                if sub_opcion not in ['1', '2']:
+                    print("Opción no válida.")
+                    continue
+                
+                expr_str = input("Ingrese la función f(x) ----> ejemplo de sintaxis: exp(x), sin(x):  ")
+                f_expr = sp.parse_expr(expr_str)
+                a = float(input("Ingrese el límite inferior (a): "))
+                b = float(input("Ingrese el límite superior (b): "))
+                
+                if sub_opcion == '1':
+                    aprox, exacto, error, tabla, h, error_msg = booleSimple(f_expr, x, a, b)
+                    metodo_nombre = "Boole Simple"
+                elif sub_opcion == '2':
+                    n = int(input("Ingrese el número de subintervalos (n) [debe ser múltiplo de 4]: "))
+                    aprox, exacto, error, tabla, h, error_msg = booleCompuesta(f_expr, x, a, b, n)
+                    metodo_nombre = "Boole Compuesta"
+                    
+                if error_msg:
+                    print(error_msg)
+                else:
+                    print("\nTabla de puntos evaluados:")
+                    headers = ["i", "xi", "f(xi)"]
+                    data = [[row['i'], f"{row['x']:.6f}", f"{row['f(x)']:.6f}"] for row in tabla]
+                    
+                    print(tabulate(data, headers=headers, tablefmt="grid"))
+                    
+                    f0 = tabla[0]['f(x)']
+                    fn = tabla[-1]['f(x)']
+                    
+                    if sub_opcion == '1':
+                        print("\nDesglose del cálculo:")
+                        f1, f2, f3 = tabla[1]['f(x)'], tabla[2]['f(x)'], tabla[3]['f(x)']
+                        print(f"32 * f(x1) = {32 * f1:.6f}")
+                        print(f"12 * f(x2) = {12 * f2:.6f}")
+                        print(f"32 * f(x3) = {32 * f3:.6f}")
+                        
+                        total_suma = 7*f0 + 32*f1 + 12*f2 + 32*f3 + 7*fn
+                        print(f"\nSuma total: 7*f(x0) + 32*f(x1) + 12*f(x2) + 32*f(x3) + 7*f(x4) = {total_suma:.6f}")
+                    elif sub_opcion == '2':
+                        suma_impares = sum(row['f(x)'] for row in tabla[1:-1] if row['i'] % 2 != 0)
+                        suma_pares_no_m4 = sum(row['f(x)'] for row in tabla[1:-1] if row['i'] % 2 == 0 and row['i'] % 4 != 0)
+                        suma_m4 = sum(row['f(x)'] for row in tabla[1:-1] if row['i'] % 4 == 0)
+                        
+                        print("\nDesglose del cálculo:")
+                        print(f"Σf(impares) = {suma_impares:.6f}")
+                        print(f"32 * Σf(impares) = {32 * suma_impares:.6f}")
+                        print(f"Σf(pares no múltiplos de 4) = {suma_pares_no_m4:.6f}")
+                        print(f"12 * Σf(pares no múltiplos de 4) = {12 * suma_pares_no_m4:.6f}")
+                        print(f"Σf(múltiplos de 4) = {suma_m4:.6f}")
+                        print(f"14 * Σf(múltiplos de 4) = {14 * suma_m4:.6f}")
+                        
+                        total_suma = 7*f0 + 32*suma_impares + 12*suma_pares_no_m4 + 14*suma_m4 + 7*fn
+                        print(f"\nSuma total: 7*f(x0) + 32*Σf(impares) + 12*Σf(pares no m4) + 14*Σf(múltiplos de 4) + 7*f(xn) = {total_suma:.6f}")
+
+                    print(f"\nResultados Regla de Boole ({metodo_nombre}):")
+                    print(f"Límites de integración: [{a}, {b}]")
+                    print(f"Tamaño de paso (h): {h:.6g}")
+                    print(f"\nValor Aproximado: {aprox:.6f}")
+                    print(f"Valor Exacto: {exacto:.6f}")
+                    print(f"Error Absoluto: {error:.6g}")
+                    
+                    puntos_x = [row['x'] for row in tabla]
+                    puntos_y = [row['f(x)'] for row in tabla]
+                    
+                    puntos_ggb = list(zip(puntos_x, puntos_y))
+                    nombre_archivo = "integ_boole_simple" if sub_opcion == '1' else f"integ_boole_compuesta_n_{n}"
+                    crearGgb([f_expr], puntos_ggb, nombre_archivo)
+                    
+                    graficarIntegracion(f_expr, x, a, b, puntos_x, puntos_y, metodo=metodo_nombre)
+
 
         except Exception as e:
             print(f"Error al procesar los datos: {e}")

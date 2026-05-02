@@ -7,7 +7,7 @@ x: símbolo de la variable de integración.
 a: límite inferior de integración.
 b: límite superior de integración.
 """
-def reglaTrapecioSimple(f_expr, x, a, b):
+def trapecioSimple(f_expr, x, a, b):
     try:
         h = b - a
         fa = float(f_expr.subs(x, a))
@@ -40,7 +40,7 @@ a: límite inferior de integración.
 b: límite superior de integración.
 n: número de subintervalos.
 """
-def reglaTrapecioCompuesta(f_expr, x, a, b, n):
+def trapecioCompuesta(f_expr, x, a, b, n):
     try:
         if n < 1:
             return None, None, None, None, None, "El número de subintervalos (n) debe ser mayor o igual a 1."
