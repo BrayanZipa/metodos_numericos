@@ -1,5 +1,4 @@
 import sympy as sp
-import math
 
 """
 Calcula la integral numérica de una función usando la Regla del Trapecio Simple.

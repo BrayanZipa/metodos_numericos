@@ -9,6 +9,7 @@ from interpolacion.polinomioLagrange import lagrange
 from interpolacion.polinomioNewton import newton
 from interpolacion.polinomioMinimosCuadrados import minimosCuadrados
 from integracion.reglaTrapecio import reglaTrapecioSimple, reglaTrapecioCompuesta
+from integracion.reglaSimpson import simpsonUnTercioSimple, simpsonUnTercioCompuesta, simpsonTresOctavosSimple, simpsonTresOctavosCompuesta
 from graficar import graficarMetodos, graficarInterpolacion, graficarIntegracion
 from generarArchivo import crearGgb
 
@@ -205,7 +206,6 @@ def menuInterpolacion():
             
             elif opcion == '2':
                 num_puntos = int(input("Ingrese la cantidad de puntos (n): "))
-
                 puntos_x = []
                 puntos_y = []
                 for i in range(num_puntos):
@@ -252,7 +252,6 @@ def menuInterpolacion():
 
             elif opcion == '3':
                 num_puntos = int(input("Ingrese la cantidad de puntos (n): "))
-
                 puntos_x = []
                 puntos_y = []
                 for i in range(num_puntos):
@@ -457,6 +456,23 @@ def menuIntegracionNumerica():
                 if error_msg:
                     print(error_msg)
                 else:
+                    print("\nTabla de puntos evaluados:")
+                    headers = ["i", "xi", "f(xi)"]
+                    data = [[row['i'], f"{row['x']:.6f}", f"{row['f(x)']:.6f}"] for row in tabla]
+                    
+                    print(tabulate(data, headers=headers, tablefmt="grid"))
+                    
+                    f0 = tabla[0]['f(x)']
+                    fn = tabla[-1]['f(x)']
+                    
+                    suma_interior = sum(row['f(x)'] for row in tabla[1:-1])
+                    print("\nDesglose del cálculo:")
+                    print(f"Σf(xi) internos = {suma_interior:.6f}")
+                    print(f"2 * Σf(xi) internos = {2 * suma_interior:.6f}")
+                    
+                    total_suma = f0 + 2 * suma_interior + fn
+                    print(f"\nSuma total: f(x0) + 2*Σf(xi) + f(xn) = {total_suma:.6f}")
+                    
                     print(f"\nResultados Regla del Trapecio ({metodo_nombre}):")
                     print(f"Límites de integración: [{a}, {b}]")
                     print(f"Tamaño de paso (h): {h:.6g}")
@@ -464,20 +480,99 @@ def menuIntegracionNumerica():
                     print(f"Valor Exacto: {exacto:.6f}")
                     print(f"Error Absoluto: {error:.6g}")
                     
-                    print("\nTabla de puntos evaluados:")
-                    headers = ["i", "xi", "f(xi)"]
-                    data = [[row['i'], f"{row['x']:.6f}", f"{row['f(x)']:.6f}"] for row in tabla]
-                    
-                    suma_fxi = sum(row['f(x)'] for row in tabla)
-                    data.append(["", "Σ =", f"{suma_fxi:.6f}"])
-                    
-                    print(tabulate(data, headers=headers, tablefmt="grid"))
-                    
                     puntos_x = [row['x'] for row in tabla]
                     puntos_y = [row['f(x)'] for row in tabla]
                     
                     puntos_ggb = list(zip(puntos_x, puntos_y))
                     nombre_archivo = "integ_trapecio_simple" if sub_opcion == '1' else f"integ_trapecio_compuesta_n_{n}"
+                    crearGgb([f_expr], puntos_ggb, nombre_archivo)
+                    
+                    graficarIntegracion(f_expr, x, a, b, puntos_x, puntos_y, metodo=metodo_nombre)
+
+            elif opcion == '2':
+                print("\n--- Regla de Simpson ---")
+                print("1. Simpson 1/3 Simple")
+                print("2. Simpson 1/3 Compuesta")
+                print("3. Simpson 3/8 Simple")
+                print("4. Simpson 3/8 Compuesta")
+                sub_opcion = input("\nElija una opción: ")
+                
+                if sub_opcion not in ['1', '2', '3', '4']:
+                    print("Opción no válida.")
+                    continue
+                
+                expr_str = input("Ingrese la función f(x) ----> ejemplo de sintaxis: exp(x), sin(x):  ")
+                f_expr = sp.parse_expr(expr_str)
+                a = float(input("Ingrese el límite inferior (a): "))
+                b = float(input("Ingrese el límite superior (b): "))
+                
+                if sub_opcion == '1':
+                    aprox, exacto, error, tabla, h, error_msg = simpsonUnTercioSimple(f_expr, x, a, b)
+                    metodo_nombre = "Simpson 1/3 Simple"
+                elif sub_opcion == '2':
+                    n = int(input("Ingrese el número de subintervalos (n) [debe ser par]: "))
+                    aprox, exacto, error, tabla, h, error_msg = simpsonUnTercioCompuesta(f_expr, x, a, b, n)
+                    metodo_nombre = "Simpson 1/3 Compuesta"
+                elif sub_opcion == '3':
+                    aprox, exacto, error, tabla, h, error_msg = simpsonTresOctavosSimple(f_expr, x, a, b)
+                    metodo_nombre = "Simpson 3/8 Simple"
+                elif sub_opcion == '4':
+                    n = int(input("Ingrese el número de subintervalos (n) [debe ser múltiplo de 3]: "))
+                    aprox, exacto, error, tabla, h, error_msg = simpsonTresOctavosCompuesta(f_expr, x, a, b, n)
+                    metodo_nombre = "Simpson 3/8 Compuesta"
+                    
+                if error_msg:
+                    print(error_msg)
+                else:
+                    print("\nTabla de puntos evaluados:")
+                    headers = ["i", "xi", "f(xi)"]
+                    data = [[row['i'], f"{row['x']:.6f}", f"{row['f(x)']:.6f}"] for row in tabla]
+                    
+                    print(tabulate(data, headers=headers, tablefmt="grid"))
+                    
+                    f0 = tabla[0]['f(x)']
+                    fn = tabla[-1]['f(x)']
+                    
+                    if sub_opcion in ['1', '2']:
+                        suma_impares = sum(row['f(x)'] for row in tabla[1:-1] if row['i'] % 2 != 0)
+                        suma_pares = sum(row['f(x)'] for row in tabla[1:-1] if row['i'] % 2 == 0)
+                        print("\nDesglose del cálculo:")
+                        print(f"Σf(x_pares) = {suma_pares:.6f}")
+                        print(f"2 * Σf(x_pares) = {2 * suma_pares:.6f}")
+                        print(f"Σf(x_impares) = {suma_impares:.6f}")
+                        print(f"4 * Σf(x_impares) = {4 * suma_impares:.6f}")
+                        
+                        total_suma = f0 + 4 * suma_impares + 2 * suma_pares + fn
+                        print(f"\nSuma total: f(x0) + 4*Σf(x_impares) + 2*Σf(x_pares) + f(xn) = {total_suma:.6f}")
+                        
+                    elif sub_opcion in ['3', '4']:
+                        suma_resto = sum(row['f(x)'] for row in tabla[1:-1] if row['i'] % 3 != 0)
+                        suma_multiplos_3 = sum(row['f(x)'] for row in tabla[1:-1] if row['i'] % 3 == 0)
+                        print("\nDesglose del cálculo:")
+                        print(f"Σf(múltiplos de 3) = {suma_multiplos_3:.6f}")
+                        print(f"2 * Σf(múltiplos de 3) = {2 * suma_multiplos_3:.6f}")
+                        print(f"Σf(resto) = {suma_resto:.6f}")
+                        print(f"3 * Σf(resto) = {3 * suma_resto:.6f}")
+                        
+                        total_suma = f0 + 3 * suma_resto + 2 * suma_multiplos_3 + fn
+                        print(f"\nSuma total: f(x0) + 3*Σf(resto) + 2*Σf(múltiplos de 3) + f(xn) = {total_suma:.6f}")
+
+                    print(f"\nResultados Regla de Simpson ({metodo_nombre}):")
+                    print(f"Límites de integración: [{a}, {b}]")
+                    print(f"Tamaño de paso (h): {h:.6g}")
+                    print(f"\nValor Aproximado: {aprox:.6f}")
+                    print(f"Valor Exacto: {exacto:.6f}")
+                    print(f"Error Absoluto: {error:.6g}")
+                    
+                    puntos_x = [row['x'] for row in tabla]
+                    puntos_y = [row['f(x)'] for row in tabla]
+                    
+                    puntos_ggb = list(zip(puntos_x, puntos_y))
+                    if sub_opcion in ['1', '3']:
+                        nombre_archivo = f"integ_simpson_{'1_3' if sub_opcion=='1' else '3_8'}_simple"
+                    else:
+                        nombre_archivo = f"integ_simpson_{'1_3' if sub_opcion=='2' else '3_8'}_compuesta_n_{n}"
+                        
                     crearGgb([f_expr], puntos_ggb, nombre_archivo)
                     
                     graficarIntegracion(f_expr, x, a, b, puntos_x, puntos_y, metodo=metodo_nombre)
@@ -501,7 +596,7 @@ def menu():
         elif opcion == '2':
             menuInterpolacion()
         elif opcion == '3':
-            menuDerivacionNumerica()
+            menuIntegracionNumerica()
         elif opcion == '4':
             menuIntegracionNumerica()
         elif opcion == '5':
