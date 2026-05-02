@@ -123,3 +123,55 @@ def graficarInterpolacion(f_expr, p_expr, x, x0=None, puntos_x=None, puntos_y=No
     plt.grid(True)
     plt.tight_layout()
     plt.show()
+
+"""
+Grafica la función y el área calculada por métodos de integración.
+f_expr: expresión de sympy
+x: símbolo de la variable (x)
+a, b: límites de integración
+puntos_x, puntos_y: puntos evaluados por el método (para dibujar los trapecios u otros)
+metodo: nombre del método de integración
+"""
+def graficarIntegracion(f_expr, x, a, b, puntos_x, puntos_y, metodo="Regla del Trapecio"):
+    f_np = sp.lambdify(x, f_expr, 'numpy')
+    
+    # Determinar rango de la gráfica
+    margin = abs(b - a) * 0.2 if abs(b - a) > 0 else 1.0
+    x_vals = np.linspace(a - margin, b + margin, 400)
+    
+    try:
+        y_vals = f_np(x_vals)
+    except Exception:
+        y_vals = np.zeros_like(x_vals) # Fallback si falla
+        
+    plt.figure()
+    try:
+        plt.get_current_fig_manager().window.state('zoomed')
+    except:
+        pass
+        
+    # Función original
+    plt.plot(x_vals, y_vals, label=f"f(x) = {f_expr}", color='blue')
+    
+    # Rellenar el área de integración (aproximación)
+    plt.fill_between(puntos_x, 0, puntos_y, color='orange', alpha=0.3, label='Área de integración')
+    
+    # Dibujar las líneas de los trapecios (bordes)
+    for px, py in zip(puntos_x, puntos_y):
+        plt.plot([px, px], [0, py], color='red', linestyle='--', linewidth=1)
+    
+    # Puntos evaluados
+    plt.plot(puntos_x, puntos_y, color='red', marker='o', label='Puntos evaluados', markersize=4)
+    
+    # Ejes
+    plt.axhline(0, color='black', linewidth=0.5)
+    if x_vals[0] <= 0 <= x_vals[-1]:
+        plt.axvline(0, color='black', linewidth=0.5)
+        
+    plt.title(f"Integración Numérica: {metodo}")
+    plt.xlabel("x")
+    plt.ylabel("f(x)")
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()

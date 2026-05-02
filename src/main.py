@@ -8,7 +8,8 @@ from interpolacion.polinomioTaylor import taylor
 from interpolacion.polinomioLagrange import lagrange
 from interpolacion.polinomioNewton import newton
 from interpolacion.polinomioMinimosCuadrados import minimosCuadrados
-from graficar import graficarMetodos, graficarInterpolacion
+from integracion.reglaTrapecio import reglaTrapecioSimple, reglaTrapecioCompuesta
+from graficar import graficarMetodos, graficarInterpolacion, graficarIntegracion
 from generarArchivo import crearGgb
 
 def menuMetodos():
@@ -27,7 +28,6 @@ def menuMetodos():
         opcion = input("\nElija una opción: ")
         
         if opcion == '5':
-            print("Saliendo del programa...")
             break
             
         if opcion not in ['1', '2', '3', '4']:
@@ -205,6 +205,7 @@ def menuInterpolacion():
             
             elif opcion == '2':
                 num_puntos = int(input("Ingrese la cantidad de puntos (n): "))
+
                 puntos_x = []
                 puntos_y = []
                 for i in range(num_puntos):
@@ -251,6 +252,7 @@ def menuInterpolacion():
 
             elif opcion == '3':
                 num_puntos = int(input("Ingrese la cantidad de puntos (n): "))
+
                 puntos_x = []
                 puntos_y = []
                 for i in range(num_puntos):
@@ -386,14 +388,14 @@ def menuInterpolacion():
                         data_coef.append([f"a{i}", f"{coef:.6f}"])
                     print(tabulate(data_coef, headers=["Coeficiente", "Valor"], tablefmt="grid"))
                     
-                    print("\nMétricas de error:")
-                    print(f"Error sumatoria de cuadrados residuales (Sr): {reporte['sr']:.6f}")
-                    print(f"Sumatoria total (St): {reporte['st']:.6f}")
-                    print(f"Coeficiente de determinación r^2: {reporte['r2']:.6f}")
-                    
+                    # print("\nMétricas de error:")
+                    # print(f"Error sumatoria de cuadrados residuales (Sr): {reporte['sr']:.6f}")
+                    # print(f"Sumatoria total (St): {reporte['st']:.6f}")
+                    # print(f"Coeficiente de determinación r^2: {reporte['r2']:.6f}")
+
                     print(f"\nPolinomio por mínimos cuadrados de grado {grado}:")
                     print(f"P(x) = {polinomio}")
-
+                    
                     if x_eval is not None:
                         valor_aprox = float(polinomio.subs(x, x_eval))
                         print(f"\nValor Aproximado P({x_eval}) = {valor_aprox:.6f}")
@@ -408,12 +410,89 @@ def menuInterpolacion():
         except Exception as e:
             print(f"Error al procesar los datos: {e}")
 
+def menuIntegracionNumerica():
+    x = sp.symbols('x')
+
+    while True:
+        print("\n--- MÉTODOS DE INTEGRACIÓN NUMÉRICA POR BRAYAN ZIPA ---")
+        print("\nSintaxis recomendada: sqrt(x), log(x), exp(x), sin(x), cos(x), x**n")
+        print("\n--- Seleccione el método a utilizar ---\n")
+        print("1. Regla del Trapecio")
+        print("2. Regla de Simpson")
+        print("3. Volver al menú principal")
+        
+        opcion = input("\nElija una opción: ")
+        
+        if opcion == '3':
+            break
+            
+        if opcion not in ['1', '2']:
+            print("Opción no válida.")
+            continue
+
+        try:
+            if opcion == '1':
+                print("\n--- Regla del Trapecio ---")
+                print("1. Trapecio Simple")
+                print("2. Trapecio Compuesta")
+                sub_opcion = input("\nElija una opción: ")
+                
+                if sub_opcion not in ['1', '2']:
+                    print("Opción no válida.")
+                    continue
+                
+                expr_str = input("Ingrese la función f(x) ----> ejemplo de sintaxis: exp(x), sin(x):  ")
+                f_expr = sp.parse_expr(expr_str)
+                a = float(input("Ingrese el límite inferior (a): "))
+                b = float(input("Ingrese el límite superior (b): "))
+                
+                if sub_opcion == '1':
+                    aprox, exacto, error, tabla, h, error_msg = reglaTrapecioSimple(f_expr, x, a, b)
+                    metodo_nombre = "Trapecio Simple"
+                elif sub_opcion == '2':
+                    n = int(input("Ingrese el número de subintervalos (n): "))
+                    aprox, exacto, error, tabla, h, error_msg = reglaTrapecioCompuesta(f_expr, x, a, b, n)
+                    metodo_nombre = "Trapecio Compuesta"
+                
+                if error_msg:
+                    print(error_msg)
+                else:
+                    print(f"\nResultados Regla del Trapecio ({metodo_nombre}):")
+                    print(f"Límites de integración: [{a}, {b}]")
+                    print(f"Tamaño de paso (h): {h:.6g}")
+                    print(f"\nValor Aproximado: {aprox:.6f}")
+                    print(f"Valor Exacto: {exacto:.6f}")
+                    print(f"Error Absoluto: {error:.6g}")
+                    
+                    print("\nTabla de puntos evaluados:")
+                    headers = ["i", "xi", "f(xi)"]
+                    data = [[row['i'], f"{row['x']:.6f}", f"{row['f(x)']:.6f}"] for row in tabla]
+                    
+                    suma_fxi = sum(row['f(x)'] for row in tabla)
+                    data.append(["", "Σ =", f"{suma_fxi:.6f}"])
+                    
+                    print(tabulate(data, headers=headers, tablefmt="grid"))
+                    
+                    puntos_x = [row['x'] for row in tabla]
+                    puntos_y = [row['f(x)'] for row in tabla]
+                    
+                    puntos_ggb = list(zip(puntos_x, puntos_y))
+                    nombre_archivo = "integ_trapecio_simple" if sub_opcion == '1' else f"integ_trapecio_compuesta_n_{n}"
+                    crearGgb([f_expr], puntos_ggb, nombre_archivo)
+                    
+                    graficarIntegracion(f_expr, x, a, b, puntos_x, puntos_y, metodo=metodo_nombre)
+
+        except Exception as e:
+            print(f"Error al procesar los datos: {e}")
+
 def menu():
     while True:
         print("\n--- MENÚ PRINCIPAL ---")
         print("1. Métodos Numéricos")
         print("2. Interpolación")
-        print("3. Salir")
+        print("3. Derivación Numérica")
+        print("4. Integración Numérica")
+        print("5. Salir")
         
         opcion = input("\nElija una opción: ")
         
@@ -422,6 +501,10 @@ def menu():
         elif opcion == '2':
             menuInterpolacion()
         elif opcion == '3':
+            menuDerivacionNumerica()
+        elif opcion == '4':
+            menuIntegracionNumerica()
+        elif opcion == '5':
             print("Saliendo del programa...")
             break
         else:
