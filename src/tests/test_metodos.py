@@ -1,8 +1,8 @@
+import sympy as sp
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-import sympy as sp
 from metodos.metodoSecante import secante
 from metodos.metodoPuntoFijo import puntoFijo
 from metodos.metodoNewton import newtonRaphson

@@ -1,8 +1,8 @@
+import sympy as sp
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-import sympy as sp
 from interpolacion.polinomioTaylor import taylor
 from interpolacion.polinomioLagrange import lagrange
 from interpolacion.polinomioNewton import newton
