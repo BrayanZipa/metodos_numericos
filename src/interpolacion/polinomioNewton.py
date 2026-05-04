@@ -156,4 +156,118 @@ def newton(x_points, y_points, x, tipo_diferencia, x_eval = None):
         
     except Exception as e:
         return None, None, f"Error al calcular el polinomio de Newton: {str(e)}"
+
+
+
+# def newton(x_points, y_points, x, tipo_diferencia, x_eval = None):
+#     n = len(x_points)
     
+#     try:
+#         if len(x_points) != len(y_points):
+#             return None, None, "La cantidad de puntos x y f(x) deben ser iguales."
+        
+#         if tipo_diferencia == 1:  # Diferencias Divididas Progresivas
+#             x_pts = x_points[:]
+#             y_pts = y_points[:]
+#         elif tipo_diferencia == 2:  # Diferencias Divididas Regresivas
+#             x_pts = x_points[::-1]
+#             y_pts = y_points[::-1]
+#         elif tipo_diferencia == 3:  # Diferencias Divididas Centradas
+#             if x_eval is not None:
+#                 centro = x_eval
+#             else:
+#                 centro = x_points[n // 2]
+            
+#             # puntos = list(zip(x_points, y_points))
+#             # # Ordenar por cercanía al centro
+#             # puntos.sort(key=lambda p: abs(p[0] - centro))
+#             # x_pts = [p[0] for p in puntos]
+#             # y_pts = [p[1] for p in puntos]
+
+
+
+#             puntos = list(zip(x_points, y_points))
+#             puntos.sort(key=lambda p: abs(p[0] - centro))
+
+#             # Intercalar: x0, x+1, x-1, x+2, x-2, ...
+#             puntos_ordenados = [puntos[0]]
+#             izq = [p for p in puntos[1:] if p[0] < puntos[0][0]]
+#             der = [p for p in puntos[1:] if p[0] > puntos[0][0]]
+
+#             for i in range(max(len(izq), len(der))):
+#                 if i < len(der):
+#                     puntos_ordenados.append(der[i])
+#                 if i < len(izq):
+#                     puntos_ordenados.append(izq[i])
+
+#             x_pts = [p[0] for p in puntos_ordenados]
+#             y_pts = [p[1] for p in puntos_ordenados]
+
+
+
+
+#         else:
+#             return None, None, "Tipo de diferencia no válido."
+
+#         # Crear la tabla de diferencias divididas
+#         tabla = [[0.0] * n for _ in range(n)]
+        
+#         # La primera columna son los valores de y
+#         for i in range(n):
+#             tabla[i][0] = float(y_pts[i])
+            
+#         # Calcular las diferencias divididas
+#         for j in range(1, n):
+#             for i in range(n - j):
+#                 tabla[i][j] = (tabla[i+1][j-1] - tabla[i][j-1]) / (x_pts[i+j] - x_pts[i])
+
+#         # Construir el polinomio
+#         polinomio = tabla[0][0]
+#         termino_acumulado = 1
+        
+#         pasos = []
+#         pasos.append({
+#             'i': 0,
+#             'xi': x_pts[0],
+#             'fi': y_pts[0],
+#             'coef': tabla[0][0],
+#             'termino': str(sp.N(sp.Float(tabla[0][0]), 6)),
+#             'termino_simple': str(sp.N(sp.Float(tabla[0][0]), 6)),
+#             'val_termino': float(tabla[0][0]) if x_eval is not None else "N/A"
+#         })
+        
+#         for i in range(1, n):
+#             termino_acumulado *= (x - x_pts[i-1])
+#             coeficiente = tabla[0][i]
+#             termino = coeficiente * termino_acumulado
+#             polinomio += termino
+            
+#             # Calcular valor del término si hay x_eval
+#             val_termino = "N/A"
+#             if x_eval is not None:
+#                 val_termino = float(termino.subs(x, x_eval).evalf())
+            
+#             pasos.append({
+#                 'i': i,
+#                 'xi': x_pts[i],
+#                 'fi': y_pts[i],
+#                 'coef': coeficiente,
+#                 'termino': str(sp.N(termino, 6)),
+#                 'termino_simple': str(sp.expand(termino.evalf(6))),
+#                 'val_termino': val_termino
+#             })
+            
+#         polinomio = sp.simplify(polinomio.evalf(6))
+
+#         # Estructurar la tabla de diferencias divididas
+#         diff_table = []
+#         for i in range(n):
+#             fila = {'xi': x_pts[i], 'fi': y_pts[i]}
+#             for j in range(1, n - i):
+#                 fila[f'diff_{j}'] = tabla[i][j]
+#             diff_table.append(fila)
+            
+#         return polinomio, {'pasos': pasos, 'tabla': diff_table}, None
+        
+#     except Exception as e:
+#         return None, None, f"Error al calcular el polinomio de Newton: {str(e)}"

@@ -175,3 +175,68 @@ def graficarIntegracion(f_expr, x, a, b, puntos_x, puntos_y, metodo="Regla del T
     plt.grid(True)
     plt.tight_layout()
     plt.show()
+
+"""
+Grafica la función original, su derivada exacta y los puntos utilizados en la derivación numérica.
+f_expr: expresión de sympy de la función original
+x: símbolo de la variable (x)
+x0: punto donde se evalúa la derivada
+puntos_x: lista de coordenadas x de los puntos usados
+puntos_y: lista de coordenadas f(x) de los puntos usados
+metodo: nombre del método de derivación
+"""
+def graficarDerivacion(f_expr, x, x0, puntos_x, puntos_y, metodo="Derivación Numérica"):
+    f_np = sp.lambdify(x, f_expr, 'numpy')
+    
+    # Determinar rango de la gráfica
+    x_min = min(puntos_x)
+    x_max = max(puntos_x)
+    rango = x_max - x_min
+    margin = rango * 0.5 if rango > 0 else 2.0
+    x_vals = np.linspace(x_min - margin, x_max + margin, 400)
+    
+    try:
+        y_vals = f_np(x_vals)
+    except Exception:
+        y_vals = np.zeros_like(x_vals)
+        
+    plt.figure()
+    try:
+        plt.get_current_fig_manager().window.state('zoomed')
+    except:
+        pass
+        
+    # Función original
+    plt.plot(x_vals, y_vals, label=f"f(x) = {f_expr}", color='blue')
+    
+    # Derivada exacta
+    df_expr = sp.diff(f_expr, x)
+    df_np = sp.lambdify(x, df_expr, 'numpy')
+    try:
+        dy_vals = df_np(x_vals)
+        plt.plot(x_vals, dy_vals, label=f"f'(x) = {df_expr}", color='green', linestyle='--')
+    except Exception:
+        pass
+    
+    # Puntos evaluados
+    plt.scatter(puntos_x, puntos_y, color='red', zorder=5, s=60, label='Puntos utilizados')
+    
+    # Marcar el punto x0
+    fx0 = float(f_expr.subs(x, x0))
+    plt.scatter([x0], [fx0], color='purple', zorder=6, s=100, marker='*', label=f'x0 = {x0}')
+    
+    # Ejes
+    y_min_all = min(min(y_vals), min(puntos_y))
+    y_max_all = max(max(y_vals), max(puntos_y))
+    if y_min_all <= 0 <= y_max_all:
+        plt.axhline(0, color='black', linewidth=0.5)
+    if x_vals[0] <= 0 <= x_vals[-1]:
+        plt.axvline(0, color='black', linewidth=0.5)
+        
+    plt.title(f"Derivación Numérica: {metodo}")
+    plt.xlabel("x")
+    plt.ylabel("y")
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()

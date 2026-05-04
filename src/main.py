@@ -8,10 +8,11 @@ from interpolacion.polinomioTaylor import taylor
 from interpolacion.polinomioLagrange import lagrange
 from interpolacion.polinomioNewton import newton
 from interpolacion.polinomioMinimosCuadrados import minimosCuadrados
+from derivacion.derivacionNumerica import derivadaDosPuntos, derivadaTresPuntos, derivadaCincoPuntos, derivadaOrdenSuperior
 from integracion.reglaTrapecio import trapecioSimple, trapecioCompuesta
 from integracion.reglaSimpson import simpsonUnTercioSimple, simpsonUnTercioCompuesta, simpsonTresOctavosSimple, simpsonTresOctavosCompuesta
 from integracion.reglaBoole import booleSimple, booleCompuesta
-from graficar import graficarMetodos, graficarInterpolacion, graficarIntegracion
+from graficar import graficarMetodos, graficarInterpolacion, graficarIntegracion, graficarDerivacion
 from generarArchivo import crearGgb
 
 def menuMetodos():
@@ -409,6 +410,134 @@ def menuInterpolacion():
                 
         except Exception as e:
             print(f"Error al procesar los datos: {e}")
+
+def menuDerivacionNumerica():
+    x = sp.symbols('x')
+    
+    while True:
+        print("\n--- MÉTODOS DE DERIVACIÓN NUMÉRICA POR BRAYAN ZIPA ---")
+        print("\nSintaxis recomendada: sqrt(x), log(x), exp(x), sin(x), cos(x), x**n")
+        print("\n--- Seleccione el método a utilizar ---\n")
+        print("1. Fórmula de 2 puntos")
+        print("2. Fórmula de 3 puntos (Mayor precisión O(h^2))")
+        print("3. Fórmula de 5 puntos (Alta precisión O(h^4))")
+        print("4. Fórmula para derivada de orden superior (2da, 3ra...)")
+        print("5. Volver al menú principal")
+        
+        opcion = input("\nElija una opción: ")
+        
+        if opcion == '5':
+            break
+
+        if opcion not in ['1', '2', '3', '4']:
+            print("Opción no válida.")
+            continue
+            
+        try:
+            expr_str = input("Ingrese la función f(x) ----> ejemplo de sintaxis: exp(x), sin(x):  ")
+            x0 = float(input("Ingrese el punto donde desea derivar (x0): "))
+            h = float(input("Ingrese el tamaño de paso (h): "))
+            
+            print("\nTipos de diferencia:")
+            print("1. Diferencia progresiva")
+            print("2. Diferencia regresiva")
+            print("3. Diferencia central")
+            tipo_diferencia = int(input("\nElija qué tipo de diferencia usar: "))
+            
+            if expr_str.strip():
+                f_expr = sp.parse_expr(expr_str)
+            else:
+                # Ingresar puntos manualmente y construir polinomio por interpolación
+                num_puntos = int(input("Ingrese la cantidad de puntos: "))
+                puntos_x_input = []
+                puntos_y_input = []
+                for i in range(num_puntos):
+                    px = float(input(f"x[{i}]: "))
+                    py = float(input(f"y[{i}]: "))
+                    puntos_x_input.append(px)
+                    puntos_y_input.append(py)
+                
+                # Intentar construir polinomio con Lagrange primero, si falla usar Newton
+                f_expr = None
+                try:
+                    polinomio_lag, _, error_lag = lagrange(puntos_x_input, puntos_y_input, x)
+                    if error_lag is None and polinomio_lag is not None:
+                        f_expr = polinomio_lag
+                        print(f"\nPolinomio construido por Lagrange: f(x) = {f_expr}")
+                except Exception:
+                    pass
+                
+                if f_expr is None:
+                    try:
+                        polinomio_new, _, error_new = newton(puntos_x_input, puntos_y_input, x, tipo_diferencia)
+                        if error_new is None and polinomio_new is not None:
+                            f_expr = polinomio_new
+                            print(f"\nPolinomio construido por Newton: f(x) = {f_expr}")
+                    except Exception:
+                        pass
+                
+                if f_expr is None:
+                    print("Error: No se pudo construir un polinomio con los puntos ingresados.")
+                    continue
+            
+            tabla = None
+            error_teorico = None
+            error_msg = None
+            nombre_regla = None
+            orden = 1
+            
+            if opcion == '1':
+                valor_aprox, valor_exacto, error_abs, error_teorico, tabla, h, nombre_regla, error_msg = derivadaDosPuntos(f_expr, x, x0, h, tipo_diferencia)
+                metodo_nombre = "2 Puntos"
+            elif opcion == '2':
+                valor_aprox, valor_exacto, error_abs, error_teorico, tabla, h, nombre_regla, error_msg = derivadaTresPuntos(f_expr, x, x0, h, tipo_diferencia)
+                metodo_nombre = "3 Puntos"
+            elif opcion == '3':
+                valor_aprox, valor_exacto, error_abs, error_teorico, tabla, h, nombre_regla, error_msg = derivadaCincoPuntos(f_expr, x, x0, h, tipo_diferencia)
+                metodo_nombre = "5 Puntos"
+            elif opcion == '4':
+                orden = int(input("Ingrese el orden de la derivada (2 para segunda, 3 para tercera...): "))
+                valor_aprox, valor_exacto, error_abs, tabla, h, nombre_regla, error_msg = derivadaOrdenSuperior(f_expr, x, x0, h, orden, tipo_diferencia)
+                metodo_nombre = f"Orden Superior ({orden})"
+            
+            if error_msg:
+                print(error_msg)
+            else:
+                # Mostrar tabla de puntos evaluados
+                print("\nTabla de puntos evaluados:")
+                headers = ["i", "xi", "f(xi)"]
+                data = [[row['i'], f"{row['x']:.6f}", f"{row['f(x)']:.6f}"] for row in tabla]
+                print(tabulate(data, headers=headers, tablefmt="grid"))
+                
+                # Resumen de resultados
+                print(f"\nResultados Derivada Numérica ({nombre_regla}):")
+                
+                derivada_simbolica = sp.diff(f_expr, x, orden)
+                print(f"\nFunción original: f(x) = {f_expr}")
+                print(f"Derivada real de la función original (orden {orden}): f{''.join([chr(39)]*orden)}(x) = {derivada_simbolica}")
+                
+                print(f"\nPunto de evaluación (x0): {x0}")
+                print(f"Tamaño de paso (h): {h:.6g}")
+                print(f"\nValor Aproximado: {valor_aprox:.6f}")
+                print(f"Valor Exacto: {valor_exacto:.6f}")
+                print(f"Error Absoluto: {error_abs:.6g}")
+                
+                if error_teorico is not None:
+                    print(f"Error Teórico: {error_teorico:.6g}")
+                
+                # Generar gráfica y archivo GGB
+                puntos_x = [row['x'] for row in tabla]
+                puntos_y = [row['f(x)'] for row in tabla]
+                
+                puntos_ggb = list(zip(puntos_x, puntos_y))
+                nombre_archivo = f"deriv_{metodo_nombre.lower().replace(' ', '_').replace('(', '').replace(')', '')}"
+                crearGgb([f_expr], puntos_ggb, nombre_archivo)
+                
+                graficarDerivacion(f_expr, x, x0, puntos_x, puntos_y, metodo=nombre_regla)
+                
+        except Exception as e:
+            print(f"Error al procesar los datos: {e}")
+
 def menuIntegracionNumerica():
     x = sp.symbols('x')
 
@@ -653,8 +782,7 @@ def menuIntegracionNumerica():
                     crearGgb([f_expr], puntos_ggb, nombre_archivo)
                     
                     graficarIntegracion(f_expr, x, a, b, puntos_x, puntos_y, metodo=metodo_nombre)
-
-
+                    
         except Exception as e:
             print(f"Error al procesar los datos: {e}")
 
@@ -674,7 +802,7 @@ def menu():
         elif opcion == '2':
             menuInterpolacion()
         elif opcion == '3':
-            menuIntegracionNumerica()
+            menuDerivacionNumerica()
         elif opcion == '4':
             menuIntegracionNumerica()
         elif opcion == '5':
