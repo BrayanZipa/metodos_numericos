@@ -571,7 +571,40 @@ def menuIntegracionNumerica():
                     continue
                 
                 expr_str = input("Ingrese la función f(x) ----> ejemplo de sintaxis: exp(x), sin(x):  ")
-                f_expr = sp.parse_expr(expr_str)
+                if expr_str.strip():
+                    f_expr = sp.parse_expr(expr_str)
+                else:
+                    num_puntos = int(input("Ingrese la cantidad de puntos: "))
+                    puntos_x_input = []
+                    puntos_y_input = []
+                    for i in range(num_puntos):
+                        px = float(input(f"x[{i}]: "))
+                        py = float(input(f"y[{i}]: "))
+                        puntos_x_input.append(px)
+                        puntos_y_input.append(py)
+                    
+                    f_expr = None
+                    try:
+                        polinomio_lag, _, error_lag = lagrange(puntos_x_input, puntos_y_input, x)
+                        if error_lag is None and polinomio_lag is not None:
+                            f_expr = polinomio_lag
+                            print(f"\nPolinomio construido por Lagrange: f(x) = {f_expr}")
+                    except Exception:
+                        pass
+                    
+                    if f_expr is None:
+                        try:
+                            polinomio_new, _, error_new = newton(puntos_x_input, puntos_y_input, x, 1)
+                            if error_new is None and polinomio_new is not None:
+                                f_expr = polinomio_new
+                                print(f"\nPolinomio construido por Newton: f(x) = {f_expr}")
+                        except Exception:
+                            pass
+                    
+                    if f_expr is None:
+                        print("Error: No se pudo construir un polinomio con los puntos ingresados.")
+                        continue
+
                 a = float(input("Ingrese el límite inferior (a): "))
                 b = float(input("Ingrese el límite superior (b): "))
                 
@@ -604,7 +637,12 @@ def menuIntegracionNumerica():
                     print(f"\nSuma total: f(x0) + 2*Σf(xi) + f(xn) = {total_suma:.6f}")
                     
                     print(f"\nResultados Regla del Trapecio ({metodo_nombre}):")
-                    print(f"Límites de integración: [{a}, {b}]")
+                    
+                    integral_simbolica = sp.integrate(f_expr, x)
+                    print(f"\nFunción original: f(x) = {f_expr}")
+                    print(f"Integral real de la función original: F(x) = {integral_simbolica}")
+                    
+                    print(f"\nLímites de integración: [{a}, {b}]")
                     print(f"Tamaño de paso (h): {h:.6g}")
                     print(f"\nValor Aproximado: {aprox:.6f}")
                     print(f"Valor Exacto: {exacto:.6f}")
@@ -632,7 +670,40 @@ def menuIntegracionNumerica():
                     continue
                 
                 expr_str = input("Ingrese la función f(x) ----> ejemplo de sintaxis: exp(x), sin(x):  ")
-                f_expr = sp.parse_expr(expr_str)
+                if expr_str.strip():
+                    f_expr = sp.parse_expr(expr_str)
+                else:
+                    num_puntos = int(input("Ingrese la cantidad de puntos: "))
+                    puntos_x_input = []
+                    puntos_y_input = []
+                    for i in range(num_puntos):
+                        px = float(input(f"x[{i}]: "))
+                        py = float(input(f"y[{i}]: "))
+                        puntos_x_input.append(px)
+                        puntos_y_input.append(py)
+                    
+                    f_expr = None
+                    try:
+                        polinomio_lag, _, error_lag = lagrange(puntos_x_input, puntos_y_input, x)
+                        if error_lag is None and polinomio_lag is not None:
+                            f_expr = polinomio_lag
+                            print(f"\nPolinomio construido por Lagrange: f(x) = {f_expr}")
+                    except Exception:
+                        pass
+                    
+                    if f_expr is None:
+                        try:
+                            polinomio_new, _, error_new = newton(puntos_x_input, puntos_y_input, x, 1)
+                            if error_new is None and polinomio_new is not None:
+                                f_expr = polinomio_new
+                                print(f"\nPolinomio construido por Newton: f(x) = {f_expr}")
+                        except Exception:
+                            pass
+                    
+                    if f_expr is None:
+                        print("Error: No se pudo construir un polinomio con los puntos ingresados.")
+                        continue
+                
                 a = float(input("Ingrese el límite inferior (a): "))
                 b = float(input("Ingrese el límite superior (b): "))
                 
@@ -688,7 +759,12 @@ def menuIntegracionNumerica():
                         print(f"\nSuma total: f(x0) + 3*Σf(resto) + 2*Σf(múltiplos de 3) + f(xn) = {total_suma:.6f}")
 
                     print(f"\nResultados Regla de Simpson ({metodo_nombre}):")
-                    print(f"Límites de integración: [{a}, {b}]")
+                    
+                    integral_simbolica = sp.integrate(f_expr, x)
+                    print(f"\nFunción original: f(x) = {f_expr}")
+                    print(f"Integral real de la función original: F(x) = {integral_simbolica}")
+                    
+                    print(f"\nLímites de integración: [{a}, {b}]")
                     print(f"Tamaño de paso (h): {h:.6g}")
                     print(f"\nValor Aproximado: {aprox:.6f}")
                     print(f"Valor Exacto: {exacto:.6f}")
@@ -718,7 +794,40 @@ def menuIntegracionNumerica():
                     continue
                 
                 expr_str = input("Ingrese la función f(x) ----> ejemplo de sintaxis: exp(x), sin(x):  ")
-                f_expr = sp.parse_expr(expr_str)
+                if expr_str.strip():
+                    f_expr = sp.parse_expr(expr_str)
+                else:
+                    num_puntos = int(input("Ingrese la cantidad de puntos: "))
+                    puntos_x_input = []
+                    puntos_y_input = []
+                    for i in range(num_puntos):
+                        px = float(input(f"x[{i}]: "))
+                        py = float(input(f"y[{i}]: "))
+                        puntos_x_input.append(px)
+                        puntos_y_input.append(py)
+                    
+                    f_expr = None
+                    try:
+                        polinomio_lag, _, error_lag = lagrange(puntos_x_input, puntos_y_input, x)
+                        if error_lag is None and polinomio_lag is not None:
+                            f_expr = polinomio_lag
+                            print(f"\nPolinomio construido por Lagrange: f(x) = {f_expr}")
+                    except Exception:
+                        pass
+                    
+                    if f_expr is None:
+                        try:
+                            polinomio_new, _, error_new = newton(puntos_x_input, puntos_y_input, x, 1)
+                            if error_new is None and polinomio_new is not None:
+                                f_expr = polinomio_new
+                                print(f"\nPolinomio construido por Newton: f(x) = {f_expr}")
+                        except Exception:
+                            pass
+                    
+                    if f_expr is None:
+                        print("Error: No se pudo construir un polinomio con los puntos ingresados.")
+                        continue
+                
                 a = float(input("Ingrese el límite inferior (a): "))
                 b = float(input("Ingrese el límite superior (b): "))
                 
@@ -768,7 +877,12 @@ def menuIntegracionNumerica():
                         print(f"\nSuma total: 7*f(x0) + 32*Σf(impares) + 12*Σf(pares no m4) + 14*Σf(múltiplos de 4) + 7*f(xn) = {total_suma:.6f}")
 
                     print(f"\nResultados Regla de Boole ({metodo_nombre}):")
-                    print(f"Límites de integración: [{a}, {b}]")
+                    
+                    integral_simbolica = sp.integrate(f_expr, x)
+                    print(f"\nFunción original: f(x) = {f_expr}")
+                    print(f"Integral real de la función original: F(x) = {integral_simbolica}")
+                    
+                    print(f"\nLímites de integración: [{a}, {b}]")
                     print(f"Tamaño de paso (h): {h:.6g}")
                     print(f"\nValor Aproximado: {aprox:.6f}")
                     print(f"Valor Exacto: {exacto:.6f}")
