@@ -240,3 +240,42 @@ def graficarDerivacion(f_expr, x, x0, puntos_x, puntos_y, metodo="Derivación Nu
     plt.grid(True)
     plt.tight_layout()
     plt.show()
+
+"""
+Grafica la solución de la Ecuación Diferencial Numérica y la compara con la solución exacta.
+exact_expr: expresión de la solución exacta (puede ser None)
+x: símbolo de la variable
+puntos_x, puntos_y: puntos calculados numéricamente
+metodo: nombre del método numérico
+"""
+def graficarEcuacionDiferencial(exact_expr, x, puntos_x, puntos_y, metodo="Euler"):
+    plt.figure()
+    try:
+        plt.get_current_fig_manager().window.state('zoomed')
+    except:
+        pass
+        
+    plt.plot(puntos_x, puntos_y, color='blue', marker='o', label=f'Aproximación ({metodo})')
+    
+    if exact_expr is not None:
+        f_np = sp.lambdify(x, exact_expr, 'numpy')
+        x_min, x_max = min(puntos_x), max(puntos_x)
+        margin = (x_max - x_min) * 0.1 if x_max > x_min else 0.5
+        x_vals = np.linspace(x_min - margin, x_max + margin, 400)
+        try:
+            y_vals = f_np(x_vals)
+            plt.plot(x_vals, y_vals, label=f"Solución Exacta: y = {exact_expr}", color='red')
+        except Exception:
+            pass
+            
+    plt.axhline(0, color='black', linewidth=0.5)
+    if min(puntos_x) <= 0 <= max(puntos_x):
+        plt.axvline(0, color='black', linewidth=0.5)
+        
+    plt.title(f"Ecuación Diferencial Numérica: {metodo}")
+    plt.xlabel("x")
+    plt.ylabel("y")
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()

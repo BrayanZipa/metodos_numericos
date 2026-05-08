@@ -12,7 +12,8 @@ from derivacion.derivacionNumerica import derivadaDosPuntos, derivadaTresPuntos,
 from integracion.reglaTrapecio import trapecioSimple, trapecioCompuesta
 from integracion.reglaSimpson import simpsonUnTercioSimple, simpsonUnTercioCompuesta, simpsonTresOctavosSimple, simpsonTresOctavosCompuesta
 from integracion.reglaBoole import booleSimple, booleCompuesta
-from graficar import graficarMetodos, graficarInterpolacion, graficarIntegracion, graficarDerivacion
+from ecuacionDiferencial.metodoEuler import euler
+from graficar import graficarMetodos, graficarInterpolacion, graficarIntegracion, graficarDerivacion, graficarEcuacionDiferencial
 from generarArchivo import crearGgb
 
 def menuMetodos():
@@ -530,7 +531,7 @@ def menuDerivacionNumerica():
                 puntos_y = [row['f(x)'] for row in tabla]
                 
                 puntos_ggb = list(zip(puntos_x, puntos_y))
-                nombre_archivo = f"deriv_{metodo_nombre.lower().replace(' ', '_').replace('(', '').replace(')', '')}"
+                nombre_archivo = f"derivada_{metodo_nombre.lower().replace(' ', '_').replace('(', '').replace(')', '')}"
                 crearGgb([f_expr], puntos_ggb, nombre_archivo)
                 
                 graficarDerivacion(f_expr, x, x0, puntos_x, puntos_y, metodo=nombre_regla)
@@ -652,7 +653,7 @@ def menuIntegracionNumerica():
                     puntos_y = [row['f(x)'] for row in tabla]
                     
                     puntos_ggb = list(zip(puntos_x, puntos_y))
-                    nombre_archivo = "integ_trapecio_simple" if sub_opcion == '1' else f"integ_trapecio_compuesta_n_{n}"
+                    nombre_archivo = "integral_trapecio_simple" if sub_opcion == '1' else f"integral_trapecio_compuesta_n_{n}"
                     crearGgb([f_expr], puntos_ggb, nombre_archivo)
                     
                     graficarIntegracion(f_expr, x, a, b, puntos_x, puntos_y, metodo=metodo_nombre)
@@ -775,9 +776,9 @@ def menuIntegracionNumerica():
                     
                     puntos_ggb = list(zip(puntos_x, puntos_y))
                     if sub_opcion in ['1', '3']:
-                        nombre_archivo = f"integ_simpson_{'1_3' if sub_opcion=='1' else '3_8'}_simple"
+                        nombre_archivo = f"integral_simpson_{'1_3' if sub_opcion=='1' else '3_8'}_simple"
                     else:
-                        nombre_archivo = f"integ_simpson_{'1_3' if sub_opcion=='2' else '3_8'}_compuesta_n_{n}"
+                        nombre_archivo = f"integral_simpson_{'1_3' if sub_opcion=='2' else '3_8'}_compuesta_n_{n}"
                         
                     crearGgb([f_expr], puntos_ggb, nombre_archivo)
                     
@@ -892,11 +893,123 @@ def menuIntegracionNumerica():
                     puntos_y = [row['f(x)'] for row in tabla]
                     
                     puntos_ggb = list(zip(puntos_x, puntos_y))
-                    nombre_archivo = "integ_boole_simple" if sub_opcion == '1' else f"integ_boole_compuesta_n_{n}"
+                    nombre_archivo = "integral_boole_simple" if sub_opcion == '1' else f"integral_boole_compuesta_n_{n}"
                     crearGgb([f_expr], puntos_ggb, nombre_archivo)
                     
                     graficarIntegracion(f_expr, x, a, b, puntos_x, puntos_y, metodo=metodo_nombre)
                     
+        except Exception as e:
+            print(f"Error al procesar los datos: {e}")
+
+def menuEcuacionDiferencialNumerica():
+    x, y = sp.symbols('x y')
+    
+    while True:
+        print("\n--- MÉTODOS DE ECUACIÓN DIFERENCIAL NUMÉRICA POR BRAYAN ZIPA ---")
+        print("\nSintaxis recomendada: sqrt(x), log(x), exp(x), sin(x), cos(x), x**n, x*y")
+        print("\n--- Seleccione el método a utilizar ---\n")
+        print("1. Método de Euler")
+        print("2. Volver al menú principal")
+        
+        opcion = input("\nElija una opción: ")
+        
+        if opcion == '2':
+            break
+            
+        if opcion not in ['1']:
+            print("Opción no válida.")
+            continue
+
+        try:
+            if opcion == '1':
+                print("\n--- Método de Euler ---")
+                expr_str = input("Ingrese la función f(x, y) (es decir, y') ----> ejemplo: x - y, x**2 + y: ")
+                f_expr = sp.parse_expr(expr_str)
+                
+                x0 = float(input("Ingrese el valor inicial de x (x0): "))
+                xf = float(input("Ingrese el valor final de x (xf): "))
+                y0 = float(input("Ingrese el valor inicial de y (y0): "))
+                n = int(input("Ingrese la cantidad de pasos (n): "))
+                
+                h = (xf - x0) / n
+                
+                exact_str = input("Ingrese la solución exacta y(x) [Deje en blanco para intentar calcularla automáticamente]: ")
+                
+                exact_expr = None
+                if exact_str.strip():
+                    exact_expr = sp.parse_expr(exact_str)
+                else:
+                    print("\nIntentando calcular la solución exacta automáticamente con SymPy...")
+                    try:
+                        y_func = sp.Function('y')
+                        ode_expr = f_expr.subs(y, y_func(x))
+                        eq = sp.Eq(y_func(x).diff(x), ode_expr)
+                        sol = sp.dsolve(eq, y_func(x), ics={y_func(x0): y0})
+                        exact_expr = sol.rhs
+                        print(f"Solución exacta calculada: y(x) = {exact_expr}")
+                    except Exception as e:
+                        print(f"No se pudo calcular la solución exacta de forma analítica: {e}")
+                        print("Se continuará solo con la aproximación numérica.")
+                
+                tabla = euler(f_expr, x, y, x0, y0, xf, h, exact_expr)
+                
+                print("\nResultados Método de Euler:")
+                if exact_expr:
+                    headers = ["n", "xi", "yi", "Valor Real", "Error Absoluto", "Error Relativo"]
+                    data = [[row['n'], f"{row['xi']:.6g}", f"{row['yi']:.6g}", f"{row['valor_real']:.6g}", f"{row['error_abs']:.6g}", f"{row['error_rel']:.6g}"] for row in tabla]
+                else:
+                    headers = ["n", "xi", "yi"]
+                    data = [[row['n'], f"{row['xi']:.6g}", f"{row['yi']:.6g}"] for row in tabla]
+                    
+                print(tabulate(data, headers=headers, tablefmt="grid"))
+                
+                ultimo = tabla[-1]
+                print(f"\nResumen de resultados en x = {xf}:")
+                print(f"Tamaño de paso (h): {h:.6g}")
+                print(f"Valor obtenido (yi): {ultimo['yi']:.6f}")
+                if exact_expr:
+                    print(f"Valor real: {ultimo['valor_real']:.6f}")
+                    print(f"Error absoluto: {ultimo['error_abs']:.6g}")
+                    print(f"Error relativo: {ultimo['error_rel']:.6g}")
+                    
+                # Generar gráfica y archivo GGB
+                puntos_x = [row['xi'] for row in tabla]
+                puntos_y = [row['yi'] for row in tabla]
+                puntos_ggb = list(zip(puntos_x, puntos_y))
+                
+                exprs = [f_expr]
+                if exact_expr:
+                    exprs.append(exact_expr)
+                    
+                    # Intentar obtener polinomio interpolador de los puntos obtenidos por Euler
+                    try:
+                        pol_interpolado = None
+                        
+                        # Aplicando método de interpolación de Lagrange
+                        try:
+                            pol, _, error = lagrange(puntos_x, puntos_y, x)
+                            if not error:
+                                pol_interpolado = pol
+                        except:
+                            pass
+                        
+                        # Si falla, se aplica el método de interpolación de Newton
+                        if pol_interpolado is None:
+                            try:
+                                pol, _, error = newton(puntos_x, puntos_y, x, 1)
+                                if not error:
+                                    pol_interpolado = pol
+                            except:
+                                pass
+                        
+                        if pol_interpolado is not None:
+                            exprs.append(pol_interpolado)
+                    except Exception as e:
+                        print(f"No se pudo generar el polinomio interpolador: {e}")
+                        
+                crearGgb(exprs, puntos_ggb, f"ec_diferencial_euler_n_{n}")
+                graficarEcuacionDiferencial(exact_expr, x, puntos_x, puntos_y, metodo="Euler")
+                
         except Exception as e:
             print(f"Error al procesar los datos: {e}")
 
@@ -907,7 +1020,8 @@ def menu():
         print("2. Interpolación")
         print("3. Derivación Numérica")
         print("4. Integración Numérica")
-        print("5. Salir")
+        print("5. Ecuación Diferencial Numérica")
+        print("6. Salir")
         
         opcion = input("\nElija una opción: ")
         
@@ -920,6 +1034,8 @@ def menu():
         elif opcion == '4':
             menuIntegracionNumerica()
         elif opcion == '5':
+            menuEcuacionDiferencialNumerica()
+        elif opcion == '6':
             print("Saliendo del programa...")
             break
         else:

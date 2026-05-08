@@ -87,8 +87,15 @@ def generarFunciones(funciones):
         # Reemplaza la nomenclatura 3.8e-08 por 3.8*10^(-08)
         expr_str = re.sub(r"(\d+\.?\d*)e([-+]?\d+)", r"\1*10^(\2)", expr_str)
 
+        # Determinar variables para la firma de la función en GeoGebra
+        vars_str = "x"
+        if hasattr(expresion, 'free_symbols'):
+            simbolos = [str(s) for s in expresion.free_symbols]
+            if 'y' in simbolos:
+                vars_str = "x, y"
+
         xml += f"""
-        <expression label="{label}" exp="{label}(x) = {expr_str}" type="function"/>
+        <expression label="{label}" exp="{label}({vars_str}) = {expr_str}" type="function"/>
         <element type="function" label="{label}">
             <show object="true" label="true" ev="4"/>
             <objColor r="{r}" g="{g}" b="{b}" alpha="0"/>
