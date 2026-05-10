@@ -265,6 +265,9 @@ def graficarEcuacionDiferencial(exact_expr, x, puntos_x, puntos_y, metodo="Euler
         try:
             y_vals = f_np(x_vals)
             plt.plot(x_vals, y_vals, label=f"Solución Exacta: y = {exact_expr}", color='red')
+            
+            y_exactos = [float(f_np(px)) for px in puntos_x]
+            plt.scatter(puntos_x, y_exactos, color='red', marker='x', label='Puntos Exactos', zorder=5)
         except Exception:
             pass
             

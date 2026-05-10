@@ -13,6 +13,7 @@ from integracion.reglaTrapecio import trapecioSimple, trapecioCompuesta
 from integracion.reglaSimpson import simpsonUnTercioSimple, simpsonUnTercioCompuesta, simpsonTresOctavosSimple, simpsonTresOctavosCompuesta
 from integracion.reglaBoole import booleSimple, booleCompuesta
 from ecuacionDiferencial.metodoEuler import euler
+from ecuacionDiferencial.metodoRungeKutta import rungeKuttaSegundoOrden, rungeKuttaCuartoOrden
 from graficar import graficarMetodos, graficarInterpolacion, graficarIntegracion, graficarDerivacion, graficarEcuacionDiferencial
 from generarArchivo import crearGgb
 
@@ -909,107 +910,159 @@ def menuEcuacionDiferencialNumerica():
         print("\nSintaxis recomendada: sqrt(x), log(x), exp(x), sin(x), cos(x), x**n, x*y")
         print("\n--- Seleccione el método a utilizar ---\n")
         print("1. Método de Euler")
-        print("2. Volver al menú principal")
+        print("2. Método de Runge-Kutta")
+        print("3. Volver al menú principal")
         
         opcion = input("\nElija una opción: ")
         
-        if opcion == '2':
+        if opcion == '3':
             break
             
-        if opcion not in ['1']:
+        if opcion not in ['1', '2']:
             print("Opción no válida.")
             continue
 
         try:
+            orden_rk = None
             if opcion == '1':
                 print("\n--- Método de Euler ---")
-                expr_str = input("Ingrese la función f(x, y) (es decir, y') ----> ejemplo: x - y, x**2 + y: ")
-                f_expr = sp.parse_expr(expr_str)
+                metodo_nombre = "Euler"
+            elif opcion == '2':
+                print("\n--- Método de Runge-Kutta ---")
+                print("1. Segundo Orden")
+                print("2. Cuarto Orden")
+                sub_opcion = input("\nElija el orden: ")
                 
-                x0 = float(input("Ingrese el valor inicial de x (x0): "))
-                xf = float(input("Ingrese el valor final de x (xf): "))
-                y0 = float(input("Ingrese el valor inicial de y (y0): "))
-                n = int(input("Ingrese la cantidad de pasos (n): "))
-                
-                h = (xf - x0) / n
-                
-                exact_str = input("Ingrese la solución exacta y(x) [Deje en blanco para intentar calcularla automáticamente]: ")
-                
-                exact_expr = None
-                if exact_str.strip():
-                    exact_expr = sp.parse_expr(exact_str)
+                if sub_opcion == '1':
+                    metodo_nombre = "Runge_Kutta_orden_2"
+                    orden_rk = 2
+                elif sub_opcion == '2':
+                    metodo_nombre = "Runge_Kutta_orden_4"
+                    orden_rk = 4
                 else:
-                    print("\nIntentando calcular la solución exacta automáticamente con SymPy...")
-                    try:
-                        y_func = sp.Function('y')
-                        ode_expr = f_expr.subs(y, y_func(x))
-                        eq = sp.Eq(y_func(x).diff(x), ode_expr)
-                        sol = sp.dsolve(eq, y_func(x), ics={y_func(x0): y0})
-                        exact_expr = sol.rhs
-                        print(f"Solución exacta calculada: y(x) = {exact_expr}")
-                    except Exception as e:
-                        print(f"No se pudo calcular la solución exacta de forma analítica: {e}")
-                        print("Se continuará solo con la aproximación numérica.")
-                
+                    print("Orden no válido.")
+                    continue
+
+            expr_str = input(f"Ingrese la función f(x, y) (es decir, y') ----> ejemplo: x - y, x**2 + y: ")
+            f_expr = sp.parse_expr(expr_str)
+            
+            x0 = float(input("Ingrese el valor inicial de x (x0): "))
+            xf = float(input("Ingrese el valor final de x (xf): "))
+            y0 = float(input("Ingrese el valor inicial de y (y0): "))
+            n = int(input("Ingrese la cantidad de pasos (n): "))
+            
+            h = (xf - x0) / n
+            
+            exact_str = input("Ingrese la solución exacta y(x) [Deje en blanco para intentar calcularla automáticamente]: ")
+            
+            exact_expr = None
+            if exact_str.strip():
+                exact_expr = sp.parse_expr(exact_str)
+            else:
+                print("\nIntentando calcular la solución exacta automáticamente con SymPy...")
+                try:
+                    y_func = sp.Function('y')
+                    ode_expr = f_expr.subs(y, y_func(x))
+                    eq = sp.Eq(y_func(x).diff(x), ode_expr)
+                    sol = sp.dsolve(eq, y_func(x), ics={y_func(x0): y0})
+                    exact_expr = sol.rhs
+                    print(f"Solución exacta calculada: y(x) = {exact_expr}")
+                except Exception as e:
+                    print(f"No se pudo calcular la solución exacta de forma analítica: {e}")
+                    print("Se continuará solo con la aproximación numérica.")
+            
+            if opcion == '1':
                 tabla = euler(f_expr, x, y, x0, y0, xf, h, exact_expr)
-                
-                print("\nResultados Método de Euler:")
-                if exact_expr:
-                    headers = ["n", "xi", "yi", "Valor Real", "Error Absoluto", "Error Relativo"]
-                    data = [[row['n'], f"{row['xi']:.6g}", f"{row['yi']:.6g}", f"{row['valor_real']:.6g}", f"{row['error_abs']:.6g}", f"{row['error_rel']:.6g}"] for row in tabla]
-                else:
-                    headers = ["n", "xi", "yi"]
-                    data = [[row['n'], f"{row['xi']:.6g}", f"{row['yi']:.6g}"] for row in tabla]
+            elif orden_rk == 2:
+                tabla = rungeKuttaSegundoOrden(f_expr, x, y, x0, y0, xf, h, exact_expr)
+            else:
+                tabla = rungeKuttaCuartoOrden(f_expr, x, y, x0, y0, xf, h, exact_expr)
+            
+            print(f"\nResultados Método de {metodo_nombre}:")
+            
+            # Construir cabeceras y filas de forma dinámica según lo que haya en la tabla
+            headers = ["n", "xi", "yi"]
+            claves_extra = ['f(xi, yi)', 'k1', 'k2', 'k3', 'k4', 'yi+1']
+            
+            for clave in claves_extra:
+                if clave in tabla[0]:
+                    headers.append(clave)
                     
-                print(tabulate(data, headers=headers, tablefmt="grid"))
+            if exact_expr:
+                headers.extend(["Valor Real", "Error Absoluto", "Error Relativo"])
                 
-                ultimo = tabla[-1]
-                print(f"\nResumen de resultados en x = {xf}:")
-                print(f"Tamaño de paso (h): {h:.6g}")
-                print(f"Valor obtenido (yi): {ultimo['yi']:.6f}")
-                if exact_expr:
-                    print(f"Valor real: {ultimo['valor_real']:.6f}")
-                    print(f"Error absoluto: {ultimo['error_abs']:.6g}")
-                    print(f"Error relativo: {ultimo['error_rel']:.6g}")
-                    
-                # Generar gráfica y archivo GGB
-                puntos_x = [row['xi'] for row in tabla]
-                puntos_y = [row['yi'] for row in tabla]
-                puntos_ggb = list(zip(puntos_x, puntos_y))
+            data = []
+            for row in tabla:
+                fila = [row['n'], f"{row['xi']:.6g}", f"{row['yi']:.6g}"]
                 
-                exprs = [f_expr]
+                for clave in claves_extra:
+                    if clave in row:
+                        val = row[clave]
+                        fila.append(f"{val:.6g}" if isinstance(val, (int, float)) else val)
+                        
                 if exact_expr:
-                    exprs.append(exact_expr)
+                    fila.extend([f"{row['valor_real']:.6g}", f"{row['error_abs']:.6g}", f"{row['error_rel']:.6g}"])
                     
-                    # Intentar obtener polinomio interpolador de los puntos obtenidos por Euler
+                data.append(fila)
+                
+            print(tabulate(data, headers=headers, tablefmt="grid"))
+            
+            ultimo = tabla[-1]
+            print(f"\nResumen de resultados en x = {xf}:")
+            print(f"Tamaño de paso (h): {h:.6g}")
+            print(f"Valor obtenido (yi): {ultimo['yi']:.6f}")
+            if exact_expr:
+                print(f"Valor real: {ultimo['valor_real']:.6f}")
+                print(f"Error absoluto: {ultimo['error_abs']:.6g}")
+                print(f"Error relativo: {ultimo['error_rel']:.6g}")
+                
+            # Generar gráfica y archivo GGB
+            puntos_x = [row['xi'] for row in tabla]
+            puntos_y = [row['yi'] for row in tabla]
+            puntos_ggb = list(zip(puntos_x, puntos_y))
+            
+            exprs = [f_expr]
+            if exact_expr:
+                exprs.append(exact_expr)
+                
+                # Agregar puntos exactos a GGB
+                try:
+                    f_np = sp.lambdify(x, exact_expr, 'numpy')
+                    y_exactos = [float(f_np(px)) for px in puntos_x]
+                    puntos_exactos = list(zip(puntos_x, y_exactos))
+                    puntos_ggb.extend(puntos_exactos)
+                except Exception as e:
+                    pass
+                
+            # Intentar obtener polinomio interpolador de los puntos obtenidos
+            try:
+                pol_interpolado = None
+                
+                # Aplicando método de interpolación de Lagrange
+                try:
+                    pol, _, error = lagrange(puntos_x, puntos_y, x)
+                    if not error:
+                        pol_interpolado = pol
+                except:
+                    pass
+                
+                # Si falla, se aplica el método de interpolación de Newton
+                if pol_interpolado is None:
                     try:
-                        pol_interpolado = None
-                        
-                        # Aplicando método de interpolación de Lagrange
-                        try:
-                            pol, _, error = lagrange(puntos_x, puntos_y, x)
-                            if not error:
-                                pol_interpolado = pol
-                        except:
-                            pass
-                        
-                        # Si falla, se aplica el método de interpolación de Newton
-                        if pol_interpolado is None:
-                            try:
-                                pol, _, error = newton(puntos_x, puntos_y, x, 1)
-                                if not error:
-                                    pol_interpolado = pol
-                            except:
-                                pass
-                        
-                        if pol_interpolado is not None:
-                            exprs.append(pol_interpolado)
-                    except Exception as e:
-                        print(f"No se pudo generar el polinomio interpolador: {e}")
-                        
-                crearGgb(exprs, puntos_ggb, f"ec_diferencial_euler_n_{n}")
-                graficarEcuacionDiferencial(exact_expr, x, puntos_x, puntos_y, metodo="Euler")
+                        pol, _, error = newton(puntos_x, puntos_y, x, 1)
+                        if not error:
+                            pol_interpolado = pol
+                    except:
+                        pass
                 
+                if pol_interpolado is not None:
+                    exprs.append(pol_interpolado)
+            except Exception as e:
+                print(f"No se pudo generar el polinomio interpolador: {e}")
+                    
+            crearGgb(exprs, puntos_ggb, f"ec_diferencial_{metodo_nombre.lower()}_n_{n}")
+            graficarEcuacionDiferencial(exact_expr, x, puntos_x, puntos_y, metodo=metodo_nombre)
+
         except Exception as e:
             print(f"Error al procesar los datos: {e}")
 
