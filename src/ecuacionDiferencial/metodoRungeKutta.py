@@ -42,6 +42,7 @@ def rungeKuttaSegundoOrden(f_expr, x, y, x0, y0, xf, h, exact_expr=None):
             })
             
         # Cálculos de Runge-Kutta de 2do orden (Punto medio)
+        # Fórmulas: k1 = h*f(xi, yi), k2 = h*f(xi + h/2, yi + k1/2), yi+1 = yi + k2
         f_xy = float(f_expr.subs({x: xi, y: yi}))
         k1 = h * f_xy
         k2 = h * float(f_expr.subs({x: xi + h/2, y: yi + k1/2}))
@@ -49,6 +50,7 @@ def rungeKuttaSegundoOrden(f_expr, x, y, x0, y0, xf, h, exact_expr=None):
         xi_next = xi + h
 
         # Cálculos de Runge-Kutta de 2do orden (Método de Heun)
+        # Fórmulas: k1 = h*f(xi, yi), k2 = h*f(xi + h, yi + k1), yi+1 = yi + (1/2)*(k1 + k2)
         # f_xy = float(f_expr.subs({x: xi, y: yi}))
         # k1 = h * f_xy
         # k2 = h * float(f_expr.subs({x: xi + h, y: yi + k1}))
@@ -56,6 +58,7 @@ def rungeKuttaSegundoOrden(f_expr, x, y, x0, y0, xf, h, exact_expr=None):
         # xi_next = xi + h
 
         # Cálculos de Runge-Kutta de 2do orden (Ralston)
+        # Fórmulas: k1 = h*f(xi, yi), k2 = h*f(xi + 3h/4, yi + 3k1/4), yi+1 = yi + (1/3)k1 + (2/3)k2
         # f_xy = float(f_expr.subs({x: xi, y: yi}))
         # k1 = h * f_xy
         # k2 = h * float(f_expr.subs({x: xi + 3*h/4, y: yi + 3*k1/4}))
@@ -114,6 +117,8 @@ def rungeKuttaCuartoOrden(f_expr, x, y, x0, y0, xf, h, exact_expr=None):
             })
             
         # Cálculos de Runge-Kutta de 4to orden
+        # Fórmulas: k1 = h*f(xi, yi), k2 = h*f(xi + h/2, yi + k1/2), k3 = h*f(xi + h/2, yi + k2/2), k4 = h*f(xi + h, yi + k3)
+        # yi+1 = yi + (1/6)*(k1 + 2k2 + 2k3 + k4)
         f_xy = float(f_expr.subs({x: xi, y: yi}))
         k1 = h * f_xy
         k2 = h * float(f_expr.subs({x: xi + h/2, y: yi + k1/2}))

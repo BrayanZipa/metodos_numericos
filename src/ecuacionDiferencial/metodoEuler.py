@@ -42,6 +42,7 @@ def euler(f_expr, x, y, x0, y0, xf, h, exact_expr=None):
             })
             
         if i < n:
+            # Fórmula de Euler: y_{i+1} = yi + h * f(xi, yi)
             dy = float(f_expr.subs({x: xi, y: yi}))
             yi = yi + h * dy
             xi = xi + h
