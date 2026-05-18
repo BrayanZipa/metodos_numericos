@@ -523,6 +523,11 @@ def menuDerivacionNumerica():
                 print(f"\nValor Aproximado: {valor_aprox:.6f}")
                 print(f"Valor Exacto: {valor_exacto:.6f}")
                 print(f"Error Absoluto: {error_abs:.6g}")
+                if valor_exacto != 0:
+                    error_rel = error_abs / abs(valor_exacto)
+                    print(f"Error Relativo: {error_rel:.6g}")
+                else:
+                    print("Error Relativo: N/A (Valor exacto es 0)")
                 
                 if error_teorico is not None:
                     print(f"Error Teórico: {error_teorico:.6g}")
@@ -649,6 +654,11 @@ def menuIntegracionNumerica():
                     print(f"\nValor Aproximado: {aprox:.6f}")
                     print(f"Valor Exacto: {exacto:.6f}")
                     print(f"Error Absoluto: {error:.6g}")
+                    if exacto != 0:
+                        error_rel = error / abs(exacto)
+                        print(f"Error Relativo: {error_rel:.6g}")
+                    else:
+                        print("Error Relativo: N/A (Valor exacto es 0)")
                     
                     puntos_x = [row['x'] for row in tabla]
                     puntos_y = [row['f(x)'] for row in tabla]
@@ -771,6 +781,11 @@ def menuIntegracionNumerica():
                     print(f"\nValor Aproximado: {aprox:.6f}")
                     print(f"Valor Exacto: {exacto:.6f}")
                     print(f"Error Absoluto: {error:.6g}")
+                    if exacto != 0:
+                        error_rel = error / abs(exacto)
+                        print(f"Error Relativo: {error_rel:.6g}")
+                    else:
+                        print("Error Relativo: N/A (Valor exacto es 0)")
                     
                     puntos_x = [row['x'] for row in tabla]
                     puntos_y = [row['f(x)'] for row in tabla]
@@ -889,6 +904,11 @@ def menuIntegracionNumerica():
                     print(f"\nValor Aproximado: {aprox:.6f}")
                     print(f"Valor Exacto: {exacto:.6f}")
                     print(f"Error Absoluto: {error:.6g}")
+                    if exacto != 0:
+                        error_rel = error / abs(exacto)
+                        print(f"Error Relativo: {error_rel:.6g}")
+                    else:
+                        print("Error Relativo: N/A (Valor exacto es 0)")
                     
                     puntos_x = [row['x'] for row in tabla]
                     puntos_y = [row['f(x)'] for row in tabla]
