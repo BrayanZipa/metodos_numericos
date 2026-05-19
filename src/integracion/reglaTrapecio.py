@@ -43,7 +43,7 @@ n: número de subintervalos.
 def trapecioCompuesta(f_expr, x, a, b, n):
     try:
         if n < 1:
-            return None, None, None, None, None, "El número de subintervalos (n) debe ser mayor o igual a 1."
+            return None, None, None, None, None, None, "El número de subintervalos (n) debe ser mayor o igual a 1."
             
         h = (b - a) / n
         tabla = []
@@ -74,6 +74,17 @@ def trapecioCompuesta(f_expr, x, a, b, n):
         
         error_abs = abs(valor_exacto - valor_aprox)
         
-        return valor_aprox, valor_exacto, error_abs, tabla, h, None
+        # Calcular áreas por subintervalo
+        tabla_areas = []
+        for i in range(n):
+            xi = tabla[i]['x']
+            xi_1 = tabla[i+1]['x']
+            fxi = tabla[i]['f(x)']
+            fxi_1 = tabla[i+1]['f(x)']
+            area = (h / 2) * (fxi + fxi_1)
+            tabla_areas.append({'i': i, 'xi': xi, 'xi+1': xi_1, 'f(xi)': fxi, 'f(xi+1)': fxi_1, 'area': area})
+        
+        return valor_aprox, valor_exacto, error_abs, tabla, tabla_areas, h, None
     except Exception as e:
-        return None, None, None, None, None, f"Error en Trapecio Compuesta: {e}"
+        return None, None, None, None, None, None, f"Error en Trapecio Compuesta: {e}"
+    

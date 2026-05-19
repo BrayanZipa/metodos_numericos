@@ -620,7 +620,7 @@ def menuIntegracionNumerica():
                     metodo_nombre = "Trapecio Simple"
                 elif sub_opcion == '2':
                     n = int(input("Ingrese el número de subintervalos (n): "))
-                    aprox, exacto, error, tabla, h, error_msg = trapecioCompuesta(f_expr, x, a, b, n)
+                    aprox, exacto, error, tabla, tabla_areas, h, error_msg = trapecioCompuesta(f_expr, x, a, b, n)
                     metodo_nombre = "Trapecio Compuesta"
                 
                 if error_msg:
@@ -642,6 +642,19 @@ def menuIntegracionNumerica():
                     
                     total_suma = f0 + 2 * suma_interior + fn
                     print(f"\nSuma total: f(x0) + 2*Σf(xi) + f(xn) = {total_suma:.6f}")
+                    
+                    if sub_opcion == '2' and tabla_areas:
+                        print("\nÁreas por subintervalo (Trapecio Simple):")
+                        headers_intervalos = ["Intervalo", "xi", "xi+1", "f(xi)", "f(xi+1)", "Área"]
+                        data_intervalos = []
+                        for fila in tabla_areas:
+                            data_intervalos.append([
+                                f"[{fila['i']}, {fila['i']+1}]", 
+                                f"{fila['xi']:.6f}", f"{fila['xi+1']:.6f}", 
+                                f"{fila['f(xi)']:.6f}", f"{fila['f(xi+1)']:.6f}", 
+                                f"{fila['area']:.6f}"
+                            ])
+                        print(tabulate(data_intervalos, headers=headers_intervalos, tablefmt="grid"))
                     
                     print(f"\nResultados Regla del Trapecio ({metodo_nombre}):")
                     
@@ -724,14 +737,14 @@ def menuIntegracionNumerica():
                     metodo_nombre = "Simpson 1/3 Simple"
                 elif sub_opcion == '2':
                     n = int(input("Ingrese el número de subintervalos (n) [debe ser par]: "))
-                    aprox, exacto, error, tabla, h, error_msg = simpsonUnTercioCompuesta(f_expr, x, a, b, n)
+                    aprox, exacto, error, tabla, tabla_areas, h, error_msg = simpsonUnTercioCompuesta(f_expr, x, a, b, n)
                     metodo_nombre = "Simpson 1/3 Compuesta"
                 elif sub_opcion == '3':
                     aprox, exacto, error, tabla, h, error_msg = simpsonTresOctavosSimple(f_expr, x, a, b)
                     metodo_nombre = "Simpson 3/8 Simple"
                 elif sub_opcion == '4':
                     n = int(input("Ingrese el número de subintervalos (n) [debe ser múltiplo de 3]: "))
-                    aprox, exacto, error, tabla, h, error_msg = simpsonTresOctavosCompuesta(f_expr, x, a, b, n)
+                    aprox, exacto, error, tabla, tabla_areas, h, error_msg = simpsonTresOctavosCompuesta(f_expr, x, a, b, n)
                     metodo_nombre = "Simpson 3/8 Compuesta"
                     
                 if error_msg:
@@ -769,6 +782,19 @@ def menuIntegracionNumerica():
                         
                         total_suma = f0 + 3 * suma_resto + 2 * suma_multiplos_3 + fn
                         print(f"\nSuma total: f(x0) + 3*Σf(resto) + 2*Σf(múltiplos de 3) + f(xn) = {total_suma:.6f}")
+
+                    if sub_opcion in ['2', '4'] and 'tabla_areas' in locals() and tabla_areas:
+                        metodo_str = "Simpson 1/3" if sub_opcion == '2' else "Simpson 3/8"
+                        print(f"\nÁreas por bloque ({metodo_str} Simple):")
+                        headers_intervalos = ["Intervalo", "xi", "xi_fin", "Área"]
+                        data_intervalos = []
+                        for fila in tabla_areas:
+                            data_intervalos.append([
+                                f"[{fila['i_inicio']}, {fila['i_fin']}]", 
+                                f"{fila['xi']:.6f}", f"{fila['xi_fin']:.6f}", 
+                                f"{fila['area']:.6f}"
+                            ])
+                        print(tabulate(data_intervalos, headers=headers_intervalos, tablefmt="grid"))
 
                     print(f"\nResultados Regla de Simpson ({metodo_nombre}):")
                     
@@ -853,7 +879,7 @@ def menuIntegracionNumerica():
                     metodo_nombre = "Boole Simple"
                 elif sub_opcion == '2':
                     n = int(input("Ingrese el número de subintervalos (n) [debe ser múltiplo de 4]: "))
-                    aprox, exacto, error, tabla, h, error_msg = booleCompuesta(f_expr, x, a, b, n)
+                    aprox, exacto, error, tabla, tabla_areas, h, error_msg = booleCompuesta(f_expr, x, a, b, n)
                     metodo_nombre = "Boole Compuesta"
                     
                 if error_msg:
@@ -892,6 +918,18 @@ def menuIntegracionNumerica():
                         
                         total_suma = 7*f0 + 32*suma_impares + 12*suma_pares_no_m4 + 14*suma_m4 + 7*fn
                         print(f"\nSuma total: 7*f(x0) + 32*Σf(impares) + 12*Σf(pares no m4) + 14*Σf(múltiplos de 4) + 7*f(xn) = {total_suma:.6f}")
+                        
+                        if 'tabla_areas' in locals() and tabla_areas:
+                            print("\nÁreas por bloque (Boole Simple):")
+                            headers_intervalos = ["Intervalo", "xi", "xi_fin", "Área"]
+                            data_intervalos = []
+                            for fila in tabla_areas:
+                                data_intervalos.append([
+                                    f"[{fila['i_inicio']}, {fila['i_fin']}]", 
+                                    f"{fila['xi']:.6f}", f"{fila['xi_fin']:.6f}", 
+                                    f"{fila['area']:.6f}"
+                                ])
+                            print(tabulate(data_intervalos, headers=headers_intervalos, tablefmt="grid"))
 
                     print(f"\nResultados Regla de Boole ({metodo_nombre}):")
                     

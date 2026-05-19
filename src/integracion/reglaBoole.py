@@ -88,6 +88,20 @@ def booleCompuesta(f_expr, x, a, b, n):
         
         error_abs = abs(valor_exacto - valor_aprox)
         
-        return valor_aprox, valor_exacto, error_abs, tabla, h, None
+        # Calcular áreas por subintervalo
+        tabla_areas = []
+        for i in range(0, n, 4):
+            xi = tabla[i]['x']
+            xi_4 = tabla[i+4]['x']
+            fxi = tabla[i]['f(x)']
+            fxi_1 = tabla[i+1]['f(x)']
+            fxi_2 = tabla[i+2]['f(x)']
+            fxi_3 = tabla[i+3]['f(x)']
+            fxi_4 = tabla[i+4]['f(x)']
+            area = (2 * h / 45) * (7 * fxi + 32 * fxi_1 + 12 * fxi_2 + 32 * fxi_3 + 7 * fxi_4)
+            tabla_areas.append({'i_inicio': i, 'i_fin': i+4, 'xi': xi, 'xi_fin': xi_4, 'area': area})
+            
+        return valor_aprox, valor_exacto, error_abs, tabla, tabla_areas, h, None
     except Exception as e:
-        return None, None, None, None, None, f"Error en Boole Compuesta: {e}"
+        return None, None, None, None, None, None, f"Error en Boole Compuesta: {e}"
+    

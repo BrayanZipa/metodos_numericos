@@ -79,10 +79,21 @@ def simpsonUnTercioCompuesta(f_expr, x, a, b, n):
         
         error_abs = abs(valor_exacto - valor_aprox)
         
-        return valor_aprox, valor_exacto, error_abs, tabla, h, None
+        # Calcular áreas por subintervalo
+        tabla_areas = []
+        for i in range(0, n, 2):
+            xi = tabla[i]['x']
+            xi_2 = tabla[i+2]['x']
+            fxi = tabla[i]['f(x)']
+            fxi_1 = tabla[i+1]['f(x)']
+            fxi_2 = tabla[i+2]['f(x)']
+            area = (h / 3) * (fxi + 4 * fxi_1 + fxi_2)
+            tabla_areas.append({'i_inicio': i, 'i_fin': i+2, 'xi': xi, 'xi_fin': xi_2, 'area': area})
+            
+        return valor_aprox, valor_exacto, error_abs, tabla, tabla_areas, h, None
     except Exception as e:
-        return None, None, None, None, None, f"Error en Simpson 1/3 Compuesta: {e}"
-
+        return None, None, None, None, None, None, f"Error en Simpson 1/3 Compuesta: {e}"
+    
 """
 Calcula la integral numérica de una función usando la Regla de Simpson 3/8 Simple.
 f_expr: función simbólica a integrar.
@@ -165,6 +176,19 @@ def simpsonTresOctavosCompuesta(f_expr, x, a, b, n):
         
         error_abs = abs(valor_exacto - valor_aprox)
         
-        return valor_aprox, valor_exacto, error_abs, tabla, h, None
+        # Calcular áreas por subintervalo
+        tabla_areas = []
+        for i in range(0, n, 3):
+            xi = tabla[i]['x']
+            xi_3 = tabla[i+3]['x']
+            fxi = tabla[i]['f(x)']
+            fxi_1 = tabla[i+1]['f(x)']
+            fxi_2 = tabla[i+2]['f(x)']
+            fxi_3 = tabla[i+3]['f(x)']
+            area = (3 * h / 8) * (fxi + 3 * fxi_1 + 3 * fxi_2 + fxi_3)
+            tabla_areas.append({'i_inicio': i, 'i_fin': i+3, 'xi': xi, 'xi_fin': xi_3, 'area': area})
+            
+        return valor_aprox, valor_exacto, error_abs, tabla, tabla_areas, h, None
     except Exception as e:
-        return None, None, None, None, None, f"Error en Simpson 3/8 Compuesta: {e}"
+        return None, None, None, None, None, None, f"Error en Simpson 3/8 Compuesta: {e}"
+    
