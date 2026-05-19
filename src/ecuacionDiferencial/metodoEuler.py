@@ -18,6 +18,10 @@ def euler(f_expr, x, y, x0, y0, xf, h, exact_expr=None):
     tabla = []
     
     for i in range(n + 1):
+        # Fórmula de Euler: y_{i+1} = yi + h * f(xi, yi)
+        dy = float(f_expr.subs({x: xi, y: yi}))
+        yi_next = yi + h * dy
+
         if exact_expr is not None:
             valor_real = float(exact_expr.subs({x: xi}))
             error_abs = abs(valor_real - yi)
@@ -30,6 +34,8 @@ def euler(f_expr, x, y, x0, y0, xf, h, exact_expr=None):
                 'n': i,
                 'xi': xi,
                 'yi': yi,
+                'f(xi, yi)': dy,
+                'yi+1': yi_next,
                 'valor_real': valor_real,
                 'error_abs': error_abs,
                 'error_rel': error_rel
@@ -38,13 +44,13 @@ def euler(f_expr, x, y, x0, y0, xf, h, exact_expr=None):
             tabla.append({
                 'n': i,
                 'xi': xi,
-                'yi': yi
+                'yi': yi,
+                'f(xi, yi)': dy,
+                'yi+1': yi_next
             })
             
         if i < n:
-            # Fórmula de Euler: y_{i+1} = yi + h * f(xi, yi)
-            dy = float(f_expr.subs({x: xi, y: yi}))
-            yi = yi + h * dy
+            yi = yi_next
             xi = xi + h
             
     return tabla
